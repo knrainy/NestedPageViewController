@@ -332,7 +332,7 @@ extension YourNestedPageViewController: NestedPageViewControllerDataSource {
 
 ### Objective-C 使用方式
 
-NestedPageViewController原本是用OC便写，考虑到swift是主流，于是改成了swift版本，OC工程要使用需要做一个桥接。
+NestedPageViewController原本是用OC编写，考虑到swift是主流，于是改成了swift版本，OC工程要使用需要做一个桥接。
 
 示例工程中提供了完整的 Objective-C 桥接示例，可以参考 `Example/NestedPageExample/Examples-OC` 目录下的实现。
 
