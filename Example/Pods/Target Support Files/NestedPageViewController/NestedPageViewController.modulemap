@@ -1,0 +1,6 @@
+framework module NestedPageViewController {
+  umbrella header "NestedPageViewController-umbrella.h"
+
+  export *
+  module * { export * }
+}

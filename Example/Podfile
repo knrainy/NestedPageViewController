@@ -1,0 +1,23 @@
+platform :ios, '13.0'
+
+use_frameworks!   # 让 Pods 编译成 frameworks，Swift 能直接 import
+
+target 'NestedPageExample' do
+  
+# 本地库
+pod 'NestedPageViewController', :path => '../'
+
+# 远程库
+pod 'MJRefresh', '3.7.9'
+pod 'FDFullscreenPopGesture', '1.1'
+pod 'JXCategoryView', '1.6.8'
+
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config| 
+      config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"] = "13.0"
+    end
+  end
+end

@@ -1,52 +1,364 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/main/Assets/NestedPageViewController_logo.png" title="NestedPageViewController logo" width="480">
+</p>
+<p align="center">
+  一个用于iOS的嵌套页面视图控制器，提供平滑的滚动协调体验。
+</p>
+<p align="center">
+  <a href="https://github.com/SPStore/NestedPageViewController"><img src="https://img.shields.io/badge/platform-iOS-blue.svg"></a>
+  <a href="https://swift.org/"><img src="https://img.shields.io/badge/Swift-5.0-orange.svg"></a>
+  <a href="https://developer.apple.com/ios/"><img src="https://img.shields.io/badge/iOS-13.0%2B-blue.svg"></a>
+  <a href="https://github.com/SPStore/NestedPageViewController/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg"></a>
+  <a href="https://cocoapods.org/pods/NestedPageViewController"><img src="https://img.shields.io/badge/pod-v1.0.0-brightgreen.svg"></a>
+  <a href="https://swift.org/package-manager/"><img src="https://img.shields.io/badge/SPM-compatible-brightgreen.svg"></a>
+</p>
 
-前不久腾讯Bugly发布过一篇文章[特斯拉组件](http://mp.weixin.qq.com/s/hBgvPBP12IQ1s65ru-paWw)，这个组件跟我要实现的界面是相同的，但是这文章写得很简单，也没有贡献出demo，也没有封装框架，反正我看完后还是一脸懵逼。如果你能看懂，或者看完后有了灵感，你足够自信的话，你可以去封装，我是自认菜鸟，封装这玩意儿难度真不是盖的，我写这3个程序都花了整整5天，而且后期还有过改动，不断的试，只要思路一错，就得重来。
+## 功能特点
 
-这种界面在不少app上都有出现，比如微博、美团、饿了么、爱奇艺等，我实现的过程中没有一句高深莫测的代码，难就难在思路，层级结构上；
-这种界面有3样控件是最为显眼的：头视图，分页菜单，若干个子tableView
-## 微博    难度系数： ★★★★
-* 层级结构描述    
-首先是一个父控制器，父控制上添加一个大tableView，头视图就作为tableView的tableHeaderView，这个大tableView只有一个cell，这个cell上添加一个横向滑动的scrollView，scrollView就用来添加若干个子控制器，每个子控制器都有一个tableView,称为子tableView。其中，父控制器的大tableView必须实现下面这个手势代理方法:
+- 支持头部视图、标签栏和多个子视图控制器
+- 支持内容滚动位置记录
+- 支持局部刷新和全局刷新
+- 支持子页面预加载（默认是滑动到指定页才加载）
+- 支持头部视图手指滚动
+- 支持自定义标签栏
+- 支持旋转
+
+## 功能演示
+
+<table>
+  <tr bgcolor="#f2f2f2">
+    <td width="250" align="center"><strong>记录滚动位置</strong></td>
+    <td width="250" align="center"><strong>局部刷新</strong></td>
+    <td width="250" align="center"><strong>全局刷新</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/记录滚动位置.gif" width="250" alt="记录滚动位置"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/局部刷新.gif" width="250" alt="局部刷新"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/全局刷新.gif" width="250" alt="全局刷新"></td>
+  </tr>
+  <tr bgcolor="#f2f2f2">
+    <td align="center"><strong>头部始终固定不动</strong></td>
+    <td align="center"><strong>头部缩放+导航栏隐藏</strong></td>
+    <td align="center"><strong>显示底部tabBar</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/头部始终固定不动.gif" width="250" alt="头部始终固定不动"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/头部缩放+隐藏导航栏.gif" width="250" alt="头部缩放+隐藏导航栏"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/显示系统tabBar.gif" width="250" alt="显示底部tabBar"></td>
+  </tr>
+  <tr bgcolor="#f2f2f2">
+    <td align="center"><strong>滚到顶部</strong></td>
+    <td align="center"><strong>自定义标签栏1</strong></td>
+    <td align="center"><strong>自定义标签栏2</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/滚到顶部.gif" width="250" alt="滚到顶部"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/自定义标签栏1.gif" width="250" alt="自定义标签栏1"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/自定义标签栏2.gif" width="250" alt="自定义标签栏2"></td>
+  </tr>
+</table>
+
+## 系统要求
+
+- iOS 13.0+
+- Swift 5.0+
+
+## 安装
+
+### Swift Package Manager
+
+在Xcode中，选择 File > Swift Packages > Add Package Dependency，然后输入以下URL：
+
 ```
-// 这个方法是支持多手势，当滑动子控制器中的scrollView时，MyTableView也能接收滑动事件
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
-    return [gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]];
+https://github.com/SPStore/NestedPageViewController.git
+```
+
+### CocoaPods
+
+在你的Podfile中添加：
+
+```ruby
+pod 'NestedPageViewController'
+```
+
+然后运行：
+
+```bash
+pod install
+```
+
+## 使用方法
+
+NestedPageViewController提供两种使用方式：添加子控制器方式和继承方式。
+
+### 方式一：添加子控制器方式
+
+```swift
+import UIKit
+import NestedPageViewController
+
+class YourViewController: UIViewController {
+    
+    // MARK: - Properties
+    
+    private var nestedPageViewController = NestedPageViewController()
+    private var coverView = YourHeaderView()
+    private var customTabStrip = YourCustomTabStrip()
+    
+    // MARK: - View Controllers
+    
+    private let childControllerTitles = ["标签一", "标签二", "标签三", "标签四"]
+    
+    // MARK: - Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+                
+        setupNestedPageViewController()
+    }
+    
+    // MARK: - Setup
+    
+    private func setupNestedPageViewController() {
+        nestedPageViewController.dataSource = self
+        nestedPageViewController.delegate = self
+        
+        // 添加为子控制器
+        addChild(nestedPageViewController)
+        view.addSubview(nestedPageViewController.view)
+        nestedPageViewController.didMove(toParent: self)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // 更新NestedPageViewController的frame
+        let safeAreaTop = view.safeAreaInsets.top
+        nestedPageViewController.view.frame = CGRect(
+            x: 0,
+            y: safeAreaTop,
+            width: view.bounds.width,
+            height: view.bounds.height - safeAreaTop
+        )
+    }
+}
+
+// MARK: - NestedPageViewControllerDataSource
+
+extension YourViewController: NestedPageViewControllerDataSource {
+    
+    func numberOfViewControllers(in pageViewController: NestedPageViewController) -> Int {
+        return childControllerTitles.count
+    }
+    
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+        guard index >= 0 && index < childControllerTitles.count else { return nil }
+        
+        switch index {
+        case 0:
+            return YourChildViewController1()  // 必须遵守NestedPageScrollable协议
+        case 1:
+            return YourChildViewController2()  // 必须遵守NestedPageScrollable协议
+        case 2:
+            return YourChildViewController3()  // 必须遵守NestedPageScrollable协议
+        case 3:
+            return YourChildViewController4()  // 必须遵守NestedPageScrollable协议
+        default:
+            return nil
+        }
+    }
+    
+    func coverView(in pageViewController: NestedPageViewController) -> UIView? {
+        return coverView
+    }
+    
+    func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
+        return 200.0
+    }
+    
+    func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
+        return customTabStrip  // 使用自定义标签栏
+    }
+    
+    func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
+        return 50.0
+    }
+    
+    func titlesForTabStrip(in pageViewController: NestedPageViewController) -> [String]? {
+        return nil  // 使用自定义标签栏时返回nil
+    }
+}
+
+// MARK: - NestedPageViewControllerDelegate
+
+extension YourViewController: NestedPageViewControllerDelegate {
+    
+    // 页面横向滚动到指定索引位置的回调方法
+    func pageViewController(_ pageViewController: NestedPageViewController, didScrollToPageAt index: Int) {
+        // 页面切换回调
+        print("当前页面索引: \(index)")
+    }
+    
+    // 内容垂直滚动视图的滚动状态变化回调方法
+    func pageViewController(_ pageViewController: NestedPageViewController, contentScrollViewDidScroll scrollView: UIScrollView, headerOffset: CGFloat, isSticked: Bool) {
+        // headerOffset: 头部相对contentScrollView顶部的偏移量
+        // isSticked: 是否处于完全吸顶状态
+        
+        // 例如：根据滚动状态控制导航栏的显示/隐藏
+        if isSticked {
+            // 头部完全吸顶，可以显示导航栏标题
+        } else {
+            // 头部未完全吸顶，可以隐藏导航栏标题
+        }
+    }
 }
 ```
-* 重要功能
-    1. 垂直方向上能够整体滑动，头部依然能够整体上下滑，滑动头部也就是滑动大tableView
-    2. 头部能够触发事件
-    3. 支持整体和局部刷新(局部刷新是指刷新的文字显示在分页菜单之下，而非导航栏之下)
-    4. 横向切换tableView，当切换其余tableView再次回到原tableView时不记录原先位置，直接从第0行开始
-* 效果图   
-![image](https://github.com/SPStore/HVScrollView/blob/master/微博.gif)
-## 美团    难度系数：★★★★★★★
-* 层级结构描述    
-首先是一个父控制器，父控制器添加一个横向滑动的全屏scrollView，再添加头视图和分页菜单，即横向滑动的scrollView，头视图和分页菜单都添加在父控制器的view上。横向滑动的scrollView就是用来添加子控制器,每个子控制器有一个tableView。
-* 重要功能
-    1. 垂直方向上局部滑动，头部具有平移手势，可以通过平移整体上下滑动，但是不具备scrollView的弹性效果
-    2. 头部能够触发事件
-    3. 仅支持局部刷新
-    4. 横向切换tableView，当切换其余tableView再次回到原tableView时要记录原先位置
-* 效果图   
-![image](https://github.com/SPStore/HVScrollView/blob/master/美团.gif)
-## 爱奇艺    难度系数：★★★★★★★★★★
-* 层级结构描述        
-首先是一个父控制器，父控制器上添加一个全屏的横向滑动的scrollView，这个横向滑动的scrollView用来添加若干个子控制器，每个子控制器上有个tabelView。**头视图首先添加在第一个子控制器的tableView的tabelHeaderView上**，当横向切换scrollView时，头视图的x值需要改变，改变的方向与scrollView横向滑动的方向相反，否则头视图会跟着scrollView一起横向滑动，当滑动结束时，切换头视图的父视图为下一个控制器的tableView的tableHeaderView。分页菜单添加在父控制器上。
-* 重要功能
-    1. 垂直方向上能够整体滑动，头部可以整体上下滑动，具备scrollView的弹性效果，滑动头部实际上是滑动子tableVeiw
-    2. 头部能够触发事件
-    3. 仅支持整体刷新
-    4. 横向切换tableView，当切换其余tableView再次回到原tableView时要记录原先位置
-* 效果图   
-![image](https://github.com/SPStore/HVScrollView/blob/master/爱奇艺.gif)
 
-*爱奇艺难就难在头部的处理上，如果像美团一样，将头视图添加在父控制器的view上，当先添加横向scrollView，再添加头视图时，那么头视图会遮挡横向滑动的scrollView，从而滑动头部的时候就不能上下滑动，只能通过添加手势，但是手势很难达到scrollView的弹性效果，滑动起来很僵硬；当先添加头视图，再添加横向scrollView时，横向scrollView又会把头视图遮挡，从而导致头视图不具备任何事件.*
+### 方式二：继承方式
 
-## 美团和爱奇艺的若干个子tableView联动原理
-当滑动其中一个子tableView时（我叫它主动tableView），发出一个通知，该通知由父控制器监听，在父控制器中遍历每个子tableVeiw（除去主动tableView之外的其余tableView叫被动tableView），让被动tableView跟随主动tableView滑动，当滑动到顶部，让分页菜单悬停。
+```swift
+import UIKit
+import NestedPageViewController
 
-题外话：爱奇艺的demo和爱奇艺原app的效果几乎完全一致，原app在刷新的时候切换tableView时，刷新文字不会消失，这也是爱奇艺的一个bug，我的demo在刷新时禁止scrollView滑动了。想要看爱奇艺原app的效果，你可以点击爱奇艺app的第5个tabBar："泡泡"，然后找一个明星或者其他头像点进去就能看到。
+class YourNestedPageViewController: NestedPageViewController {
+    
+    // MARK: - Properties
+    
+    private var coverView = YourHeaderView()
+    private var customTabStrip = YourCustomTabStrip()
+    
+    // MARK: - View Controllers
+    
+    private let childControllerTitles = ["标签一", "标签二", "标签三", "标签四"]
 
-大家在参考这3个demo的时候，分页菜单尽量使用[SPPageMenu](https://github.com/SPStore/SPPageMenu)，这是我自己封装的一个框架
+    // MARK: - Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setupNestedPageViewController()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        let safeTop = view.safeAreaInsets.top
+        containerInsets = UIEdgeInsets(top: safeTop, left: 0, bottom: 0, right: 0)
+        
+        // 采用继承方式时，需要在super之前设置containerInsets
+        super.viewDidLayoutSubviews()
+    }
+    
+    // MARK: - Setup
+    
+    private func setupNestedPageViewController() {
+        // 设置数据源
+        dataSource = self
+        
+        // 设置代理（继承方式下，可以直接重写代理方法）
+        delegate = self
+    }
+    
+    // MARK: - NestedPageViewControllerDelegate
+    
+    // 页面横向滚动到指定索引位置的回调方法
+    override func pageViewController(_ pageViewController: NestedPageViewController, didScrollToPageAt index: Int) {
+        super.pageViewController(pageViewController, didScrollToPageAt: index)
+        
+        // 页面切换回调
+        print("当前页面索引: \(index)")
+    }
+    
+    // 内容垂直滚动视图的滚动状态变化回调方法
+    override func pageViewController(_ pageViewController: NestedPageViewController, contentScrollViewDidScroll scrollView: UIScrollView, headerOffset: CGFloat, isSticked: Bool) {
+        super.pageViewController(pageViewController, contentScrollViewDidScroll: scrollView, headerOffset: headerOffset, isSticked: isSticked)
+        
+        // headerOffset: 头部相对contentScrollView顶部的偏移量
+        // isSticked: 是否处于完全吸顶状态
+        
+        // 例如：根据滚动状态控制导航栏的显示/隐藏
+        if isSticked {
+            // 头部完全吸顶，可以显示导航栏标题
+        } else {
+            // 头部未完全吸顶，可以隐藏导航栏标题
+        }
+    }
+}
+
+// MARK: - NestedPageViewControllerDataSource
+
+extension YourNestedPageViewController: NestedPageViewControllerDataSource {
+    
+    func numberOfViewControllers(in pageViewController: NestedPageViewController) -> Int {
+        return childControllerTitles.count
+    }
+    
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+        guard index >= 0 && index < childControllerTitles.count else { return nil }
+        
+        switch index {
+        case 0:
+            return YourChildViewController1()  // 必须遵守NestedPageScrollable协议
+        case 1:
+            return YourChildViewController2()  // 必须遵守NestedPageScrollable协议
+        case 2:
+            return YourChildViewController3()  // 必须遵守NestedPageScrollable协议
+        case 3:
+            return YourChildViewController4()  // 必须遵守NestedPageScrollable协议
+        default:
+            return nil
+        }
+    }
+    
+    func coverView(in pageViewController: NestedPageViewController) -> UIView? {
+        return coverView
+    }
+    
+    func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
+        return 200.0
+    }
+    
+    func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
+        return customTabStrip  // 使用自定义标签栏
+    }
+    
+    func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
+        return 50.0
+    }
+    
+    func titlesForTabStrip(in pageViewController: NestedPageViewController) -> [String]? {
+        return nil  // 使用自定义标签栏时返回nil
+    }
+}
+```
+
+### Objective-C 使用方式
+
+NestedPageViewController 是用 Swift 编写的，Objective-C 中使用需要做一个桥接。
+
+示例工程中提供了完整的 Objective-C 桥接示例，可以参考 `Example/NestedPageExample/Examples-OC` 目录下的实现。
+
+## 性能报告
+
+NestedPageViewController在性能方面进行了多项优化，确保在复杂的嵌套滚动场景下仍能保持流畅的用户体验。以下是性能测试的结果：
+
+### 内存占用
+<img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/main/Assets/memory.png" width="600" alt="内存占用">
+
+### CPU使用率
+<img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/main/Assets/cpu.png" width="600" alt="CPU使用率">
+
+## 项目起源
+
+本仓库的前身是我在8年前开发的一个名为**HVScrollView**的演示项目。当时由于经验有限，未能将其封装成一个通用组件。项目的思想萌芽实际上源自腾讯bugly发布的一篇关于[特斯拉组件](https://www.cnblogs.com/bugly/p/7976264.html)的文章，该文章详细介绍了iOS高性能PageController的实现原理。
+
+时光荏苒，8年过去了，我积累了更多的开发经验和技术沉淀，现在将这个想法重新实现并开源，希望能为iOS开发社区提供一个更加完善、易用的嵌套滚动解决方案。NestedPageViewController在保留原有思想精髓的基础上，进一步优化了性能和用户体验，为现代iOS应用提供了更加流畅的页面嵌套滚动效果。
+
+## 参与贡献
+
+由于本人工作繁忙，可能无法投入大量时间进行持续的更新迭代。我们非常欢迎有兴趣的开发者加入到项目中来，通过提交Pull Request的方式参与贡献。无论是功能改进、bug修复、文档完善还是性能优化，您的每一份贡献都将帮助这个项目变得更好。
+
+如果您有任何问题或建议，也欢迎通过Issues进行讨论，或直接联系作者邮箱：lesp163@163.com。让我们一起打造更好的NestedPageViewController！
 
 
+## 许可证
+
+NestedPageViewController 使用 MIT 许可证。详情请查看 LICENSE 文件。
