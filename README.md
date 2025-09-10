@@ -87,6 +87,8 @@ pod 'NestedPageViewController'
 pod install
 ```
 
+注意：如果CocoaPods的方式安装，编译报错：Xcode error when building app: line 7: /resources-to-copy-Project.txt: Permission denied，请在你的主工程中的Tartgets -> Build Settings -> User Script Sandboxing 改为No
+
 ## 使用方法
 
 NestedPageViewController提供两种使用方式：添加子控制器方式和继承方式。
