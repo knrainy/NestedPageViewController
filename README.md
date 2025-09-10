@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/main/Assets/NestedPageViewController_logo.png" title="NestedPageViewController logo" width="480">
+  <img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/master/Assets/NestedPageViewController_logo.png" title="NestedPageViewController logo" width="480">
 </p>
 <p align="center">
   一个用于iOS的嵌套页面视图控制器，提供平滑的滚动协调体验。
@@ -341,10 +341,10 @@ NestedPageViewController 是用 Swift 编写的，Objective-C 中使用需要做
 NestedPageViewController在性能方面进行了多项优化，确保在复杂的嵌套滚动场景下仍能保持流畅的用户体验。以下是性能测试的结果：
 
 ### 内存占用
-<img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/main/Assets/memory.png" width="600" alt="内存占用">
+<img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/master/Assets/memory.png" width="600" alt="内存占用">
 
 ### CPU使用率
-<img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/main/Assets/cpu.png" width="600" alt="CPU使用率">
+<img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/master/Assets/cpu.png" width="600" alt="CPU使用率">
 
 ## 项目起源
 
