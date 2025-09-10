@@ -340,7 +340,7 @@ NestedPageViewController原本是用OC编写，考虑到swift是主流，于是�
 
 ## 性能报告
 
-NestedPageViewController在性能方面进行了多项优化，确保在复杂的嵌套滚动场景下仍能保持流畅的用户体验。以下demo中4个tab下的性能评测：
+NestedPageViewController在性能方面进行了多项优化，确保在复杂的嵌套滚动场景下仍能保持流畅的用户体验。以下是demo中4个子控制下的性能评测：
 
 ### 内存占用
 <img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/master/Assets/memory.png" width="600" alt="内存占用">
