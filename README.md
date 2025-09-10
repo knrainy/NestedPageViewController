@@ -349,6 +349,9 @@ NestedPageViewController在性能方面进行了多项优化，确保在复杂�
 ### CPU使用率
 <img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/master/Assets/cpu.png" width="600" alt="CPU使用率">
 
+## 实现原理
+参见[实现原理](https://github.com/SPStore/NestedPageViewController/blob/master/docs/%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%E4%B8%8E%E9%9A%BE%E7%82%B9.md)
+
 ## 项目起源
 
 本仓库的前身是我在8年前开发的一个名为**HVScrollView**的演示项目。当时由于经验有限，未能将其封装成一个通用组件。项目的思想萌芽实际上源自腾讯bugly发布的一篇关于[特斯拉组件](https://www.cnblogs.com/bugly/p/7976264.html)的文章，该文章详细介绍了iOS高性能PageController的实现原理。
