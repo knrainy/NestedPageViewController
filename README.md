@@ -332,13 +332,13 @@ extension YourNestedPageViewController: NestedPageViewControllerDataSource {
 
 ### Objective-C 使用方式
 
-NestedPageViewController 是用 Swift 编写的，Objective-C 中使用需要做一个桥接。
+NestedPageViewController原本是用OC便写，考虑到swift是主流，于是改成了swift版本，OC工程要使用需要做一个桥接。
 
 示例工程中提供了完整的 Objective-C 桥接示例，可以参考 `Example/NestedPageExample/Examples-OC` 目录下的实现。
 
 ## 性能报告
 
-NestedPageViewController在性能方面进行了多项优化，确保在复杂的嵌套滚动场景下仍能保持流畅的用户体验。以下是性能测试的结果：
+NestedPageViewController在性能方面进行了多项优化，确保在复杂的嵌套滚动场景下仍能保持流畅的用户体验。以下demo中4个tab下的性能评测：
 
 ### 内存占用
 <img src="https://raw.githubusercontent.com/SPStore/NestedPageViewController/master/Assets/memory.png" width="600" alt="内存占用">
