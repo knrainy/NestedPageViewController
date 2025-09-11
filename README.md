@@ -354,7 +354,7 @@ NestedPageViewController在性能方面进行了多项优化，确保在复杂�
 
 ## 项目起源
 
-本仓库的前身是我在8年前开发的一个名为**HVScrollView**的演示项目。当时由于经验有限，未能将其封装成一个通用组件。项目的思想萌芽实际上源自腾讯bugly发布的一篇关于[特斯拉组件](https://www.cnblogs.com/bugly/p/7976264.html)的文章，该文章详细介绍了iOS高性能PageController的实现原理。
+本仓库的前身是我在8年前开发的一个名为**HVScrollView**的演示项目。当时由于经验有限，未能将其封装成一个通用组件。项目的思想萌芽实际上源自腾讯bugly发布的一篇关于[特斯拉组件](https://mp.weixin.qq.com/s/hBgvPBP12IQ1s65ru-paWw?poc_token=HKQ-wmijwa5omN1v5VYZzODMGBnfZCGOXPjKXLr6)的文章，该文章介绍了iOS高性能PageController的实现原理。
 
 时光荏苒，8年过去了，我积累了更多的开发经验和技术沉淀，现在将这个想法重新实现并开源，希望能为iOS开发社区提供一个更加完善、易用的嵌套滚动解决方案。NestedPageViewController在保留原有思想精髓的基础上，进一步优化了性能和用户体验，为现代iOS应用提供了更加流畅的页面嵌套滚动效果。
 
