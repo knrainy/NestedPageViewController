@@ -47,6 +47,17 @@
     <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/头部缩放+隐藏导航栏.gif" width="250" alt="头部缩放+隐藏导航栏"></td>
     <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/显示系统tabBar.gif" width="250" alt="显示底部tabBar"></td>
   </tr>
+    </tr>
+    <tr bgcolor="#f2f2f2">
+    <td align="center"><strong>子VC的sectionHeader吸顶</strong></td>
+    <td align="center"><strong>运行时修改头部高度</strong></td>
+    <td align="center"><strong>没有头部</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/子VC的sectionHeader吸顶.gif" width="250" alt="子VC的sectionHeader吸顶"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/运行时修改头部高度.gif" width="250" alt="运行时修改头部高度"></td>
+    <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/没有头部.gif" width="250" alt="没有头部"></td>
+  </tr>
   <tr bgcolor="#f2f2f2">
     <td align="center"><strong>滚到顶部</strong></td>
     <td align="center"><strong>自定义标签栏1</strong></td>
@@ -56,7 +67,6 @@
     <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/滚到顶部.gif" width="250" alt="滚到顶部"></td>
     <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/自定义标签栏1.gif" width="250" alt="自定义标签栏1"></td>
     <td><img src="https://github.com/SPStore/SPExmapleResurces/blob/main/NestedPageViewController/自定义标签栏2.gif" width="250" alt="自定义标签栏2"></td>
-  </tr>
 </table>
 
 ## 系统要求
