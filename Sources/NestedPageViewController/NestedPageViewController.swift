@@ -447,8 +447,7 @@ extension NestedPageViewController: UIScrollViewDelegate {
 public extension NestedPageViewControllerDataSource {
     
     func pageViewController(_ pageViewController: NestedPageViewController, shouldPreloadViewControllerAt index: Int) -> Bool {
-        // 默认只预加载第一个页面
-        return index == 0
+        return index == pageViewController.currentIndex
     }
     
     func coverView(in pageViewController: NestedPageViewController) -> UIView? {

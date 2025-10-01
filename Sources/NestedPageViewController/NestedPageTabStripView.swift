@@ -91,9 +91,7 @@ public protocol NestedPageTabStripViewDelegate: AnyObject {
 
 /// 内置的简单TabStrip视图
 open class NestedPageTabStripView: UIView {
-    
-    private var _intrinsicContentSize = CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
-    
+        
     // MARK: - Public Properties
     
     /// 便利构造器：使用标题数组初始化
@@ -106,8 +104,15 @@ open class NestedPageTabStripView: UIView {
     /// 使用配置初始化
     public init(configuration: NestedPageTabStripConfiguration) {
         self.configuration = configuration
-        // 给一个最小宽高，防止stackView布局时，由于父视图宽高为0，但又设置了contentEdgeInsets而报约束警告
-        super.init(frame: CGRect(x: 0, y: 0, width: configuration.contentEdgeInsets.left + configuration.contentEdgeInsets.right, height: configuration.contentEdgeInsets.top + configuration.contentEdgeInsets.bottom))
+        // 给一个最小宽高，防止stackView布局时，由于父视图宽高为0，但又设置了contentEdgeInsets或spacing而报约束警告
+        super.init(
+            frame: CGRect(
+                x: 0,
+                y: 0,
+                width: configuration.contentEdgeInsets.left + configuration.contentEdgeInsets.right + configuration.spacing * CGFloat(configuration.titles.count),
+                height: configuration.contentEdgeInsets.top + configuration.contentEdgeInsets.bottom
+            )
+        )
         setupViews()
         // 初始化完成后立即加载内容
         reloadContent()
@@ -187,12 +192,14 @@ open class NestedPageTabStripView: UIView {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
         
+        setNeedsUpdateConstraints()
         updateConstraintsIfNeeded()
                         
         titleButtons = []
     }
 
     private func reloadContent() {
+        
         setNeedsUpdateConstraints()
         updateConstraintsIfNeeded()
         
@@ -246,25 +253,6 @@ open class NestedPageTabStripView: UIView {
         NSLayoutConstraint.activate(stackViewConstraints)
     }
 
-    open override var intrinsicContentSize: CGSize {
-        
-        if _intrinsicContentSize.width == UIView.noIntrinsicMetric || _intrinsicContentSize.height == UIView.noIntrinsicMetric {
-            let arrangedSubviews = stackView.arrangedSubviews
-            let width = arrangedSubviews.map { $0.intrinsicContentSize.width }.reduce(0, +)
-            let height = arrangedSubviews.map { $0.intrinsicContentSize.height }.max() ?? 0
-            let totalSpacing = stackView.spacing * CGFloat(stackView.arrangedSubviews.count - 1)
-            let leftRightInset = configuration.contentEdgeInsets.left + configuration.contentEdgeInsets.right
-            let topBottomInset = configuration.contentEdgeInsets.top + configuration.contentEdgeInsets.bottom
-            _intrinsicContentSize = CGSize(width: width + totalSpacing + leftRightInset, height: height + topBottomInset)
-        }
-        return _intrinsicContentSize
-    }
-    
-    open override func invalidateIntrinsicContentSize() {
-        super.invalidateIntrinsicContentSize()
-        _intrinsicContentSize = CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
-    }
-    
     public func layoutIndicator() {
         guard !titleButtons.isEmpty && selectedIndex < titleButtons.count else {
             return

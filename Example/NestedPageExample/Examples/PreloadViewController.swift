@@ -35,7 +35,7 @@ class PreloadViewController: UIViewController {
         nestedPageViewController.dataSource = self
         nestedPageViewController.delegate = self
         
-        // 索引号顺序代表加载顺序，1表示优先加载第2个，默认选中的索引号为1
+        // 默认展示第2页
         nestedPageViewController.defaultPageIndex = 1
         
         // 应用全局配置

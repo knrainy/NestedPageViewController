@@ -33,7 +33,7 @@ class NoHeaderViewController: UIViewController {
         
         self.navigationItem.titleView = self.tabStripView
         view.backgroundColor = .systemBackground
-        
+                
         setupNestedPageViewController()
         
         tabStripView.linkedScrollView = nestedPageViewController.containerScrollView
@@ -43,7 +43,7 @@ class NoHeaderViewController: UIViewController {
 
     private func setupNestedPageViewController() {
         nestedPageViewController.dataSource = self
-        // 先加载第2页，再加载第1页；这样tabStrip的索引号会自动切到第2个
+        // 默认展示第2页
         nestedPageViewController.defaultPageIndex = 1
         
         // 应用全局配置
