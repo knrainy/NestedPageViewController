@@ -2,8 +2,8 @@
 //  NestedPageHeaderManager.swift
 //  NestedPageViewController
 //
-//  Created by 乐升平 on 2025/8/22.
-//  Copyright © 2025 SPStore. All rights reserved.
+//  Created by 乐升平 on 2023/8/22.
+//  Copyright © 2023 SPStore. All rights reserved.
 //
 
 import UIKit
@@ -18,10 +18,10 @@ class NestedPageHeaderManager {
     var coverView: UIView?
     var tabStrip: UIView?
     var coverHeight: CGFloat = 0
-    var tabHeight: CGFloat = 50.0
+    var tabHeight: CGFloat = 0.0
     var pageHeaderHeight: CGFloat = 0
     
-    // 这个视图起到至关重要的作用（它是可不见的），不仅控制其余scrollView的偏移量，同时也更方便控制headerContentView的位置.
+    // 这个视图起到至关重要的作用（它是可不见的），不仅控制其余scrollView的偏移量，同时也更方便控制headerContentView的位置
     var pin: UIView = UIView()
     // pin视图的Y坐标
     var previousPinY: CGFloat = 0
@@ -32,7 +32,7 @@ class NestedPageHeaderManager {
     
     lazy var fixedContainer: UIView = {
         // 这里借助NestedPageHeaderView，通过allowsSubviewHitTestOnly实现仅子视图交互，屏蔽自身交互
-        // 屏幕自身交互，是为了当headerContentView的父视图为pageHeader时，能穿透
+        // 屏蔽自身交互，是为了当headerContentView的父视图为pageHeader时，能穿透
         // 又要子控件能交互，是为了当headerContentView的父视图为fixedContainer时, headerContentView能交互。
         let fixedContainer = NestedPageHeaderView()
         fixedContainer.allowsSubviewHitTestOnly = true
@@ -114,19 +114,25 @@ class NestedPageHeaderManager {
     
     func layoutPageHeader() {
         guard let viewController = viewController else { return }
+                
+        for pageHeader in pageHeaderMap.values {
+            let headerWidth = viewController.containerView.bounds.width
+            pageHeader.frame = CGRect(x: 0, y: -pageHeaderHeight, width: headerWidth, height: pageHeaderHeight)
+        }
+
         let contentScrollViewY = viewController.contentScrollViewY
         
         fixedContainer.frame = CGRect(x: 0, y: contentScrollViewY, width: viewController.containerView.bounds.width, height: pageHeaderHeight)
         fixedContainerLayer.frame = fixedContainer.bounds
         // 通过一个mask，对fixedContainer上边做裁剪
         let path = UIBezierPath(rect: fixedContainer.bounds)
-        // 这里加200是个细节：200的意思是子控件如果部分超出了fixedContainer的下边，则留200的距离不裁剪，这是因为在回弹过程中，headerContentView的y值是大于0的，下半部分如果全部裁剪，会导致回弹过程中，tab有一瞬间不可见。
+        // 这里200是个buffer：如果子控件部分超出了fixedContainer的下边，则留200的距离不裁剪，这是因为在回弹过程中，headerContentView的y值是大于0的，下半部分如果全部裁剪，会导致回弹过程中，tab有一瞬间不可见。
         let topRect = CGRect(x: 0, y: 0, width: fixedContainer.bounds.size.width, height: fixedContainer.bounds.size.height + 200)
         path.append(UIBezierPath(rect: topRect))
         // 设置 mask 只裁剪上边
         fixedContainerLayer.path = path.cgPath
         fixedContainer.layer.mask = fixedContainerLayer
-        // 由于contentScrollView在自己的控制器中的左上角未必是(0,0)，因为有安全区域，pin的顶部必须和contentScrollView顶部对齐.
+        // 由于contentScrollView在自己的控制器中的左上角未必是(0,0)，因为有安全区域，pin的顶部必须和contentScrollView顶部对齐
         pin.frame = CGRect(x: 0, y: contentScrollViewY, width: viewController.containerView.bounds.width, height: pageHeaderHeight)
         overflowPinHeight = 0
     }
@@ -226,7 +232,7 @@ class NestedPageHeaderManager {
         guard headerContentView.superview == fixedContainer else { return }
 
         let contentScrollViewY = viewController.contentScrollViewY
-        /** 这里设置高度为contentOffset.y是一个细节，如果pageHeader的高度很短，假如固定shimView的高度为pageHeaderHeight，那么下拉到一定程度的时候，能看出这个shimView的视图颜色和背景色不一致，为了消除这个现象，让高度动态等于上一个scrollView的偏移量。l.contentOffset.y其实就是scrollView的顶端到tabStrip底部的这段距离。*/
+        /** 这里设置高度为contentOffset.y是一个细节，如果pageHeader的高度很短，假如固定shimView的高度为pageHeaderHeight，那么下拉到一定程度的时候，能看出这个shimView的视图颜色和背景色不一致，为了消除这个现象，让高度动态等于上一个scrollView的偏移量。lastScrollView.contentOffset.y其实就是scrollView的顶端到tabStrip底部的这段距离。*/
         let frame = CGRect(x: 0, y: contentScrollViewY, width: viewController.containerView.bounds.width, height: -lastScrollView.contentOffset.y)
         if let existingShim = shimView {
             existingShim.frame = frame
@@ -245,6 +251,13 @@ class NestedPageHeaderManager {
     }
     
     // MARK: - Cleanup
+    
+    func removePageHeader(at index: Int) {
+        if let pageHeader = pageHeaderMap[index] {
+            pageHeader.removeFromSuperview()
+            pageHeaderMap.removeValue(forKey: index)
+        }
+    }
     
     func cleanupOldData() {
         for view in pageHeaderMap.values {

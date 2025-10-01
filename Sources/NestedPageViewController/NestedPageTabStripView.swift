@@ -2,15 +2,15 @@
 //  NestedPageTabStripView.swift
 //  NestedPageViewController
 //
-//  Created by 乐升平 on 2025/1/24.
-//  Copyright © 2025 SPStore. All rights reserved.
+//  Created by 乐升平 on 2023/1/24.
+//  Copyright © 2023 SPStore. All rights reserved.
 //
 //  本组件作为分页控制器的内置标签栏，其设计本意是开箱即用，如果需要更复杂的标签栏样式，请自定义或者使用其它开源组件。
 
 import UIKit
 
 /// TabStrip的配置类
-public class NestedPageTabStripConfiguration: NSObject {
+public struct NestedPageTabStripConfiguration: Hashable {
     
     /// 标题数组
     public var titles: [String] = []
@@ -27,42 +27,59 @@ public class NestedPageTabStripConfiguration: NSObject {
     /// 背景颜色，默认：UIColor.white
     public var backgroundColor: UIColor = .white
     
-    /// 指示器图片
-    public var indicatorImage: UIImage?
+    /// 指示器颜色，默认：UIColor.systemYellow
+    public var indicatorColor: UIColor = .systemYellow
     
     /// 指示器大小，默认：CGSize(width: 20, height: 3)
     public var indicatorSize: CGSize = CGSize(width: 20, height: 3)
     
+    /// 指示器大小的圆角半径，默认：1.5
+    public var indicatorSizeCornerRadius: CGFloat = 1.5
+    
+    /// 指示器与容器底部之间的距离
+    public var indicatorVerticalMargin: CGFloat = 0
+    
+    /// 按钮之间的间距
+    public var spacing: CGFloat = 0.0
+    
     /// 内容边距，默认：UIEdgeInsets.zero
     public var contentEdgeInsets: UIEdgeInsets = .zero
     
-    /// 创建默认配置
-    public static func defaultConfiguration() -> NestedPageTabStripConfiguration {
-        let config = NestedPageTabStripConfiguration()
-        config.indicatorImage = defaultIndicatorImage()
-        return config
+    /// 公开初始化方法
+    public init() {}
+    
+    // MARK: - Hashable Implementation
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(titles)
+        hasher.combine(titleColor.hashValue)
+        hasher.combine(titleSelectedColor.hashValue)
+        hasher.combine(titleFont.hashValue)
+        hasher.combine(backgroundColor.hashValue)
+        hasher.combine(indicatorColor.hashValue)
+        hasher.combine(indicatorSize.width)
+        hasher.combine(indicatorSize.height)
+        hasher.combine(indicatorSizeCornerRadius)
+        hasher.combine(indicatorVerticalMargin)
+        hasher.combine(spacing)
+        hasher.combine(contentEdgeInsets.top)
+        hasher.combine(contentEdgeInsets.left)
+        hasher.combine(contentEdgeInsets.bottom)
+        hasher.combine(contentEdgeInsets.right)
     }
     
-    /// 创建默认的圆角矩形指示器
-    private static func defaultIndicatorImage() -> UIImage {
-        let image = indicatorImage(with: .systemYellow,
-                                   size: CGSize(width: 20, height: 3),
-                                   cornerRadius: 1.5)
-        return image.withRenderingMode(.alwaysTemplate)
-
-    }
-    
-    private static func indicatorImage(with color: UIColor, size: CGSize, cornerRadius: CGFloat) -> UIImage {
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image {_ in 
-            // 设置填充颜色
-            color.setFill()
-            
-            // 创建圆角矩形路径
-            let path = UIBezierPath(roundedRect: CGRect(origin: .zero, size: size),
-                                   cornerRadius: cornerRadius)
-            path.fill()
-        }
+    public static func == (lhs: NestedPageTabStripConfiguration, rhs: NestedPageTabStripConfiguration) -> Bool {
+        return lhs.titles == rhs.titles &&
+               lhs.titleColor == rhs.titleColor &&
+               lhs.titleSelectedColor == rhs.titleSelectedColor &&
+               lhs.titleFont == rhs.titleFont &&
+               lhs.backgroundColor == rhs.backgroundColor &&
+               lhs.indicatorColor == rhs.indicatorColor &&
+               lhs.indicatorSize == rhs.indicatorSize &&
+               lhs.indicatorSizeCornerRadius == rhs.indicatorSizeCornerRadius &&
+               lhs.indicatorVerticalMargin == rhs.indicatorVerticalMargin &&
+               lhs.spacing == rhs.spacing &&
+               lhs.contentEdgeInsets == rhs.contentEdgeInsets
     }
 }
 
@@ -75,11 +92,13 @@ public protocol NestedPageTabStripViewDelegate: AnyObject {
 /// 内置的简单TabStrip视图
 open class NestedPageTabStripView: UIView {
     
+    private var _intrinsicContentSize = CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+    
     // MARK: - Public Properties
     
     /// 便利构造器：使用标题数组初始化
     public convenience init(titles: [String]) {
-        let config = NestedPageTabStripConfiguration.defaultConfiguration()
+        var config = NestedPageTabStripConfiguration()
         config.titles = titles
         self.init(configuration: config)
     }
@@ -87,14 +106,15 @@ open class NestedPageTabStripView: UIView {
     /// 使用配置初始化
     public init(configuration: NestedPageTabStripConfiguration) {
         self.configuration = configuration
-        super.init(frame: .zero)
+        // 给一个最小宽高，防止stackView布局时，由于父视图宽高为0，但又设置了contentEdgeInsets而报约束警告
+        super.init(frame: CGRect(x: 0, y: 0, width: configuration.contentEdgeInsets.left + configuration.contentEdgeInsets.right, height: configuration.contentEdgeInsets.top + configuration.contentEdgeInsets.bottom))
         setupViews()
         // 初始化完成后立即加载内容
         reloadContent()
     }
     
     public override init(frame: CGRect) {
-        self.configuration = NestedPageTabStripConfiguration.defaultConfiguration()
+        self.configuration = NestedPageTabStripConfiguration()
         super.init(frame: frame)
         setupViews()
         if !configuration.titles.isEmpty {
@@ -103,7 +123,7 @@ open class NestedPageTabStripView: UIView {
     }
     
     public required init?(coder: NSCoder) {
-        self.configuration = NestedPageTabStripConfiguration.defaultConfiguration()
+        self.configuration = NestedPageTabStripConfiguration()
         super.init(coder: coder)
         setupViews()
         // 如果配置中已有标题，则立即刷新内容
@@ -120,7 +140,8 @@ open class NestedPageTabStripView: UIView {
         }
     }
     
-    /// 配置对象
+    /// 配置对象，更新配置会触发UI重建
+    /// 由于组件较轻量，采用直接重建而非精细化控制的方式
     public var configuration: NestedPageTabStripConfiguration {
         didSet {
             reloadContent()
@@ -149,26 +170,32 @@ open class NestedPageTabStripView: UIView {
     
     private var stackView = UIStackView()
     private var titleButtons: [UIButton] = []
-    private var indicatorView = UIImageView()
+    private var indicatorView = UIView()
     private var isScrollingProgrammatically = false
+    private var stackViewConstraints: [NSLayoutConstraint] = []
     
     // MARK: - Setup
     
     private func setupViews() {
+        
+        addSubview(indicatorView)
+
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         stackView.alignment = .fill
-        stackView.spacing = 0;
+        stackView.spacing = configuration.spacing
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
         
-        tintColor = .systemYellow
-        
-        addSubview(indicatorView)
-        
+        updateConstraintsIfNeeded()
+                        
         titleButtons = []
     }
-    
+
     private func reloadContent() {
+        setNeedsUpdateConstraints()
+        updateConstraintsIfNeeded()
+        
         for button in titleButtons {
             stackView.removeArrangedSubview(button)
             button.removeFromSuperview()
@@ -183,11 +210,8 @@ open class NestedPageTabStripView: UIView {
         
         updateAppearance()
         setNeedsLayout()
-                
-        // 确保指示器在下一个runloop中正确布局（此时按钮已经有正确的frame）
-        DispatchQueue.main.async { [weak self] in
-            self?.layoutIndicator()
-        }
+        layoutIfNeeded()
+        self.layoutIndicator()
     }
     
     private func createTitleButton(with title: String, index: Int) -> UIButton {
@@ -202,17 +226,43 @@ open class NestedPageTabStripView: UIView {
     
     // MARK: - Layout
     
-    public override func layoutSubviews() {
-        super.layoutSubviews()
+    open override func updateConstraints() {
+        super.updateConstraints()
+
+        // 移除旧约束
+        NSLayoutConstraint.deactivate(stackViewConstraints)
+        stackViewConstraints.removeAll()
         
-        // 根据contentEdgeInsets设置StackView的frame
-        let insets = configuration.contentEdgeInsets
-        let stackFrame = bounds.inset(by: insets)
-        stackView.frame = stackFrame
+        // 创建新约束
+        let newConstraints = [
+            stackView.topAnchor.constraint(equalTo: topAnchor, constant: configuration.contentEdgeInsets.top),
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: configuration.contentEdgeInsets.left),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -configuration.contentEdgeInsets.right),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -configuration.contentEdgeInsets.bottom)
+        ]
         
-        DispatchQueue.main.async { [weak self] in
-            self?.layoutIndicator()
+        // 保存并激活新约束
+        stackViewConstraints = newConstraints
+        NSLayoutConstraint.activate(stackViewConstraints)
+    }
+
+    open override var intrinsicContentSize: CGSize {
+        
+        if _intrinsicContentSize.width == UIView.noIntrinsicMetric || _intrinsicContentSize.height == UIView.noIntrinsicMetric {
+            let arrangedSubviews = stackView.arrangedSubviews
+            let width = arrangedSubviews.map { $0.intrinsicContentSize.width }.reduce(0, +)
+            let height = arrangedSubviews.map { $0.intrinsicContentSize.height }.max() ?? 0
+            let totalSpacing = stackView.spacing * CGFloat(stackView.arrangedSubviews.count - 1)
+            let leftRightInset = configuration.contentEdgeInsets.left + configuration.contentEdgeInsets.right
+            let topBottomInset = configuration.contentEdgeInsets.top + configuration.contentEdgeInsets.bottom
+            _intrinsicContentSize = CGSize(width: width + totalSpacing + leftRightInset, height: height + topBottomInset)
         }
+        return _intrinsicContentSize
+    }
+    
+    open override func invalidateIntrinsicContentSize() {
+        super.invalidateIntrinsicContentSize()
+        _intrinsicContentSize = CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
     }
     
     public func layoutIndicator() {
@@ -224,10 +274,10 @@ open class NestedPageTabStripView: UIView {
                 
         // 将按钮的中心点从stackView坐标系转换到TabStripView坐标系
         let buttonCenterInTabStrip = stackView.convert(selectedButton.center, to: self)
-        
+                        
         let indicatorX = buttonCenterInTabStrip.x - configuration.indicatorSize.width / 2.0
-        let indicatorY = bounds.height - configuration.indicatorSize.height - configuration.contentEdgeInsets.bottom
-        
+        let indicatorY = bounds.height - configuration.indicatorSize.height - configuration.indicatorVerticalMargin
+
         indicatorView.frame = CGRect(x: indicatorX, y: indicatorY,
                                    width: configuration.indicatorSize.width,
                                    height: configuration.indicatorSize.height)
@@ -236,13 +286,14 @@ open class NestedPageTabStripView: UIView {
     // MARK: - Public Methods
     
     /// 选中指定索引的标题
-    public func selectTab(at index: Int, animated: Bool) {
+    open func selectTab(at index: Int, animated: Bool) {
         guard index >= 0 && index < titleButtons.count && index != selectedIndex else {
             return
         }
         
         if #available(iOS 17.4, *) {
             // 17.4系统开始，通过isScrollAnimating判断是否在执行setContentOffset动画
+            // 这里不需要设置isScrollingProgrammatically
         } else {
             isScrollingProgrammatically = true
         }
@@ -260,6 +311,7 @@ open class NestedPageTabStripView: UIView {
         // 在scrollView滚动动画结束之后，重置isScrollingProgrammatically，这里对时间的要求不用太严格，只要能重置不要太晚即可。
         if #available(iOS 17.4, *) {
             // 17.4系统开始，通过isScrollAnimating判断是否在执行setContentOffset动画
+            // 不需要重置isScrollingProgrammatically
         } else {
             let delay: TimeInterval = animated ? 0.3 : 0.01
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
@@ -277,9 +329,11 @@ open class NestedPageTabStripView: UIView {
     
     private func updateAppearance() {
         backgroundColor = configuration.backgroundColor
+        indicatorView.backgroundColor = configuration.indicatorColor
         
-        // 更新指示器
-        indicatorView.image = configuration.indicatorImage
+        // 确保圆角半径不超过指示器尺寸的一半，避免出现异常的视觉效果
+        let maxRadius = min(configuration.indicatorSize.width / 2.0, configuration.indicatorSize.height / 2.0)
+        indicatorView.layer.cornerRadius = min(configuration.indicatorSizeCornerRadius, maxRadius)
         
         // 更新按钮外观
         for (index, button) in titleButtons.enumerated() {
@@ -392,8 +446,8 @@ open class NestedPageTabStripView: UIView {
         // 插值计算指示器的X位置
         let indicatorCenterX = fromCenter.x + (toCenter.x - fromCenter.x) * ratio
         let indicatorX = indicatorCenterX - configuration.indicatorSize.width / 2.0
-        let indicatorY = bounds.height - configuration.indicatorSize.height - configuration.contentEdgeInsets.bottom
-        
+        let indicatorY = bounds.height - configuration.indicatorSize.height - configuration.indicatorVerticalMargin
+
         // 更新指示器位置
         indicatorView.frame = CGRect(x: indicatorX, y: indicatorY,
                                    width: configuration.indicatorSize.width,

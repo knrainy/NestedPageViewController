@@ -154,7 +154,7 @@ extension YourViewController: NestedPageViewControllerDataSource {
         return childControllerTitles.count
     }
     
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard index >= 0 && index < childControllerTitles.count else { return nil }
         
         switch index {
@@ -294,7 +294,7 @@ extension YourNestedPageViewController: NestedPageViewControllerDataSource {
         return childControllerTitles.count
     }
     
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard index >= 0 && index < childControllerTitles.count else { return nil }
         
         switch index {

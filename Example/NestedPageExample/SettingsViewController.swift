@@ -35,6 +35,7 @@ class NestedPageConfig: NSObject {
     @objc dynamic var allowsSwipeToChangePage: Bool = true
     @objc dynamic var headerMovesOnlyWhenTouchingHeaderDuringHover: Bool = false
     @objc dynamic var interruptsScrollingWhenTransitioningToFullStick: Bool = false
+    @objc dynamic var autoAdjustsContentSizeMinimumHeight: Bool = true
     
     private override init() {
         super.init()
@@ -78,6 +79,13 @@ class NestedPageConfig: NSObject {
                 keyPath: "interruptsScrollingWhenTransitioningToFullStick",
                 type: .bool,
                 defaultValue: false
+            ),
+            NestedPageConfigItem(
+                title: "自动调整内容视图最小高度",
+                description: "确保内容视图的高度至少等于可见区域高度，防止内容过少时无法滚动到顶部",
+                keyPath: "autoAdjustsContentSizeMinimumHeight",
+                type: .bool,
+                defaultValue: true
             )
         ]
     }
@@ -91,6 +99,7 @@ class NestedPageConfig: NSObject {
         pageViewController.allowsSwipeToChangePage = allowsSwipeToChangePage
         pageViewController.headerMovesOnlyWhenTouchingHeaderDuringHover = headerMovesOnlyWhenTouchingHeaderDuringHover
         pageViewController.interruptsScrollingWhenTransitioningToFullStick = interruptsScrollingWhenTransitioningToFullStick
+        pageViewController.autoAdjustsContentSizeMinimumHeight = autoAdjustsContentSizeMinimumHeight
     }
 }
 

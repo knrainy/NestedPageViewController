@@ -67,9 +67,12 @@ class ExampleTypeModel {
         noBouncesVC.detailTitle = "本示例采用继承方式"
         let includeTabBarVC = ExampleTypeModel.model(title: "显示底部tabBar", targetClass: IncludeTabBarViewController.self)
         includeTabBarVC.detailTitle = "本示例采用继承方式"
+        let pinnedCollectionHeaderVC = ExampleTypeModel.model(title: "子VC的sectionHeader吸顶", targetClass: PinnedCollectionHeaderViewController.self)
+        pinnedCollectionHeaderVC.detailTitle = "见第3个子vc中的collectionView的sectionHeader吸顶"
         let preloadVC = ExampleTypeModel.model(title: "预加载子视图控制器，默认选中第2个", targetClass: PreloadViewController.self)
         preloadVC.detailTitle = "无需等待页面切换结束才加载内容，减少了空白页面的等待时长"
-        
+        let changeHeaderHeightVC = ExampleTypeModel.model(title: "运行时修改头部高度", targetClass: ChangeHeaderHeightViewController.self)
+        let noHeaderVc = ExampleTypeModel.model(title: "没有头部", targetClass: NoHeaderViewController.self)
         // 标签栏示例组
         let builtInTabStripVC = ExampleTypeModel.model(title: "简单定制内置tab栏", targetClass: BuiltInTabStripViewController.self)
         let customTabStripVC1 = ExampleTypeModel.model(title: "自定义tab栏1", targetClass: CustomTabStripViewController1.self)
@@ -89,7 +92,10 @@ class ExampleTypeModel {
             fullScreenGestureVC,
             noBouncesVC,
             includeTabBarVC,
-            preloadVC
+            pinnedCollectionHeaderVC,
+            changeHeaderHeightVC,
+            preloadVC,
+            noHeaderVc,
         ])
         
         let tabStripGroup = ExampleGroup(title: "标签栏示例", examples: [

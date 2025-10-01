@@ -74,7 +74,7 @@
 
 #pragma mark - NestedPageScrollable
 
-- (nonnull UIScrollView *)contentScrollView {
+- (nonnull UIScrollView *)nestedPageContentScrollView {
     return self.tableView;
 }
 
@@ -278,24 +278,24 @@
 }
 
 - (CGFloat)heightForCoverViewIn:(NestedPageViewControllerObjcBridge *)pageViewController {
-    return 200.0;
+    return 240.0;
 }
 
 - (UIView *)tabStripIn:(NestedPageViewControllerObjcBridge *)pageViewController {
-    NestedPageTabStripConfigurationObjcBridge *config = [NestedPageTabStripConfigurationObjcBridge defaultConfiguration];
+    NestedPageTabStripConfigurationObjcBridge *config = [[NestedPageTabStripConfigurationObjcBridge alloc] init];
     config.titles = self.titles;
     config.titleColor = UIColor.grayColor;
     config.titleSelectedColor = UIColor.blackColor;
     config.backgroundColor = UIColor.whiteColor;
+    config.indicatorColor = UIColor.redColor;
     
     NestedPageTabStripViewObjcBridge *tabStripBridge = [[NestedPageTabStripViewObjcBridge alloc] initWithConfiguration:config];
-    tabStripBridge.swiftTabStripView.tintColor = [UIColor redColor];
     tabStripBridge.linkedScrollView = self.pageViewControllerBridge.containerScrollView;
     return tabStripBridge.swiftTabStripView;
 }
 
 - (CGFloat)heightForTabStripIn:(NestedPageViewControllerObjcBridge *)pageViewController {
-    return 50.0;
+    return 40.0;
 }
 
 - (NSArray<NSString *> *)titlesForTabStripIn:(NestedPageViewControllerObjcBridge *)pageViewController {

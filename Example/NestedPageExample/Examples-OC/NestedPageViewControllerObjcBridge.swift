@@ -12,7 +12,7 @@ import NestedPageViewController
 
 @objc public protocol NestedPageViewControllerDataSourceObjc: AnyObject {
     @objc func numberOfViewControllers(in pageViewController: NestedPageViewControllerObjcBridge) -> Int
-    @objc func pageViewController(_ pageViewController: NestedPageViewControllerObjcBridge, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)?
+    @objc func pageViewController(_ pageViewController: NestedPageViewControllerObjcBridge, viewControllerAt index: Int) -> NestedPageScrollable?
     @objc func coverView(in pageViewController: NestedPageViewControllerObjcBridge) -> UIView?
     @objc func heightForCoverView(in pageViewController: NestedPageViewControllerObjcBridge) -> CGFloat
     @objc func tabStrip(in pageViewController: NestedPageViewControllerObjcBridge) -> UIView?
@@ -101,12 +101,12 @@ public class NestedPageViewControllerObjcBridge: NSObject {
         set { nestedPageViewController.allowsSwipeToChangePage = newValue }
     }
     
-    public var preloadViewControllerIndexes: [NSNumber] {
-        get { 
-            return nestedPageViewController.preloadViewControllerIndexes.map { NSNumber(value: $0) }
+    public var defaultPageIndex: Int {
+        get {
+            return nestedPageViewController.defaultPageIndex
         }
         set { 
-            nestedPageViewController.preloadViewControllerIndexes = newValue.map { $0.intValue }
+            nestedPageViewController.defaultPageIndex = newValue
         }
     }
     
@@ -161,12 +161,20 @@ public class NestedPageViewControllerObjcBridge: NSObject {
         return nestedPageViewController.viewController(at: index)
     }
     
-    public func reloadData() {
-        nestedPageViewController.reloadData()
+    public func rebuild() {
+        nestedPageViewController.rebuild()
     }
     
     public func reloadPages() {
-        nestedPageViewController.reloadPages()
+        nestedPageViewController.rebuildPages()
+    }
+    
+    public func loadViewController(at index: Int) {
+        nestedPageViewController.loadViewController(at: index)
+    }
+    
+    public func unloadViewController(at index: Int) {
+        nestedPageViewController.unloadViewController(at: index)
     }
     
     public func updateLayouts() {
@@ -181,7 +189,7 @@ extension NestedPageViewControllerObjcBridge: NestedPageViewControllerDataSource
         return dataSource?.numberOfViewControllers(in: self) ?? 0
     }
     
-    public func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    public func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard let viewController = dataSource?.pageViewController(self, viewControllerAt: index) else {
             return nil
         }

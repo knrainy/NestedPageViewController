@@ -13,15 +13,7 @@ class LikesViewController: ChildBaseViewController {
     
     private lazy var collectionView: MyCollectionView = {
         let layout = UICollectionViewFlowLayout()
-        // 确保间距精确为10
-        layout.minimumInteritemSpacing = 10
-        layout.minimumLineSpacing = 10
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        // 动态计算cell大小，确保间距准确（3列布局）
-        let screenWidth = UIScreen.main.bounds.width
-        let totalHorizontalPadding: CGFloat = 10 + 10 + 10 + 10 // left + right + 2个middle spacing
-        let cellWidth = (screenWidth - totalHorizontalPadding) / 3 - 1.0
-        layout.itemSize = CGSize(width: cellWidth, height: cellWidth)
+        // 布局配置通过代理方法实现
         
         let collectionView = MyCollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.delegate = self
@@ -133,9 +125,34 @@ extension LikesViewController: UICollectionViewDelegate {
     }
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
+
+// 布局配置通过代理方法实现，不要用layout在初始化时设置，因为要演示旋转，旋转后屏幕宽高发生了变化，itemSize需要通过代理的方式更新.
+extension LikesViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let screenWidth = UIScreen.main.bounds.width
+        let totalHorizontalPadding: CGFloat = 10 + 10 + 10 + 10 // left + right + 2个middle spacing
+        let cellWidth = (screenWidth - totalHorizontalPadding) / 3 - 1.0
+        return CGSize(width: cellWidth, height: cellWidth)
+    }
+}
+
 // MARK: - NestedPageScrollable
 extension LikesViewController: NestedPageScrollable {
-    func contentScrollView() -> UIScrollView {
+    
+    var nestedPageContentScrollView: UIScrollView {
         return collectionView
     }
 }

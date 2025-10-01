@@ -99,7 +99,7 @@ extension RecommendsViewController: UITableViewDelegate {
 
 // MARK: - NestedPageScrollable
 extension RecommendsViewController: NestedPageScrollable {
-    func contentScrollView() -> UIScrollView {
+    var nestedPageContentScrollView: UIScrollView {
         return tableView
     }
 }

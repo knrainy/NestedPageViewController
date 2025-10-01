@@ -17,32 +17,32 @@ public class NestedPageTabStripConfigurationObjcBridge: NSObject {
     public var titleSelectedColor: UIColor = .black
     public var titleFont: UIFont = .systemFont(ofSize: 16)
     public var backgroundColor: UIColor = .white
-    public var indicatorImage: UIImage?
+    public var indicatorColor: UIColor = .systemYellow
     public var indicatorSize: CGSize = CGSize(width: 20, height: 3)
+    public var indicatorSizeCornerRadius: CGFloat = 1.5
+    public var indicatorVerticalMargin: CGFloat = 0
+    public var spacing: CGFloat = 0.0
     public var contentEdgeInsets: UIEdgeInsets = .zero
     
-    private var swiftConfig: NestedPageTabStripConfiguration
+    private var swiftConfig = NestedPageTabStripConfiguration()
     
+    // Public initializer
     public override init() {
-        self.swiftConfig = NestedPageTabStripConfiguration()
         super.init()
+        syncFromSwiftConfig()
     }
-    
-    @objc public static func defaultConfiguration() -> NestedPageTabStripConfigurationObjcBridge {
-        let config = NestedPageTabStripConfigurationObjcBridge()
-        config.swiftConfig = NestedPageTabStripConfiguration.defaultConfiguration()
-        config.syncFromSwiftConfig()
-        return config
-    }
-    
+
     private func syncFromSwiftConfig() {
         titles = swiftConfig.titles
         titleColor = swiftConfig.titleColor
         titleSelectedColor = swiftConfig.titleSelectedColor
         titleFont = swiftConfig.titleFont
         backgroundColor = swiftConfig.backgroundColor
-        indicatorImage = swiftConfig.indicatorImage
+        indicatorColor = swiftConfig.indicatorColor
         indicatorSize = swiftConfig.indicatorSize
+        indicatorSizeCornerRadius = swiftConfig.indicatorSizeCornerRadius
+        indicatorVerticalMargin = swiftConfig.indicatorVerticalMargin
+        spacing = swiftConfig.spacing
         contentEdgeInsets = swiftConfig.contentEdgeInsets
     }
     
@@ -52,8 +52,11 @@ public class NestedPageTabStripConfigurationObjcBridge: NSObject {
         swiftConfig.titleSelectedColor = titleSelectedColor
         swiftConfig.titleFont = titleFont
         swiftConfig.backgroundColor = backgroundColor
-        swiftConfig.indicatorImage = indicatorImage
+        swiftConfig.indicatorColor = indicatorColor
         swiftConfig.indicatorSize = indicatorSize
+        swiftConfig.indicatorSizeCornerRadius = indicatorSizeCornerRadius
+        swiftConfig.indicatorVerticalMargin = indicatorVerticalMargin
+        swiftConfig.spacing = spacing
         swiftConfig.contentEdgeInsets = contentEdgeInsets
     }
     

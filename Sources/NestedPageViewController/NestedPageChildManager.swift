@@ -2,8 +2,8 @@
 //  NestedPageChildManager.swift
 //  NestedPageViewController
 //
-//  Created by 乐升平 on 2025/8/22.
-//  Copyright © 2025 SPStore. All rights reserved.
+//  Created by 乐升平 on 2023/8/22.
+//  Copyright © 2023 SPStore. All rights reserved.
 //
 
 import UIKit
@@ -37,23 +37,24 @@ class NestedPageChildManager {
     
     // MARK: - ViewController Management
     
-    func viewController(at index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func viewController(at index: Int) -> NestedPageScrollable? {
         return viewControllerMap[index]
     }
     
-    func loadViewController(at index: Int) {
+    @discardableResult
+    func loadViewController(at index: Int) -> Bool {
         guard let viewController = viewController,
               let dataSource = viewController.dataSource,
               let headerManager = headerManager,
               let scrollCoordinator = scrollCoordinator,
               index >= 0 && index < dataSource.numberOfViewControllers(in: viewController) else {
-            return
+            return false
         }
         
         var childViewController = self.viewController(at: index)
         if childViewController == nil {
             childViewController = dataSource.pageViewController(viewController, viewControllerAt: index)
-            guard let childViewController = childViewController else { return }
+            guard let childViewController = childViewController else { return false }
             
             viewController.addChild(childViewController)
             childViewController.view.frame = CGRect(x: CGFloat(index) * viewController.view.bounds.width, y: 0, width: viewController.containerScrollView.bounds.width, height: viewController.containerScrollView.bounds.height)
@@ -62,7 +63,7 @@ class NestedPageChildManager {
             childViewController.didMove(toParent: viewController)
             
             // 保证先走viewDidLoad，再获取contentScrollView，contentScrollView可能在viewDidLoad中才初始化
-            let contentScrollView = childViewController.contentScrollView()
+            let contentScrollView = childViewController.nestedPageContentScrollView
             scrollCoordinator.observeScrollView(contentScrollView)
             contentScrollView.contentInsetAdjustmentBehavior = .never
             contentScrollView.showsVerticalScrollIndicator = viewController.showsVerticalScrollIndicator
@@ -70,17 +71,45 @@ class NestedPageChildManager {
             contentScrollView.bounces = viewController.bounces
             headerManager.createAndAddPageHeader(at: index, contentScrollView: contentScrollView)
             
+            // interactivePopGestureRecognizer和contentScrollView手势共存的情况下，防止侧滑返回时，contentScrollView同时能垂直滑动
+            if let interactivePopGestureRecognizer =  viewController.navigationController?.interactivePopGestureRecognizer {
+                contentScrollView.panGestureRecognizer.require(toFail: interactivePopGestureRecognizer)
+            }
+            
             viewControllerMap[index] = childViewController
 
             childViewController.view.setNeedsLayout()
             childViewController.view.layoutIfNeeded()
             
-            contentScrollView.contentInset = UIEdgeInsets(top: headerManager.pageHeaderHeight, left: 0, bottom: contentScrollView.contentInset.bottom, right: 0)
+            // 外部可能想要设置自己的inset.bottom，如果外部设置的inset.bottom比安全区域还大，就保持外部设置的
+            contentScrollView.contentInset = UIEdgeInsets(top: headerManager.pageHeaderHeight, left: 0, bottom: max(contentScrollView.safeAreaInsets.bottom, contentScrollView.contentInset.bottom), right: 0)
             contentScrollView.scrollIndicatorInsets = contentScrollView.contentInset
             
             let currentContentInitializeContentOffsetY = -contentScrollView.contentInset.top + min(-headerManager.previousPinY + contentScrollView.frame.minY, headerManager.coverHeight - viewController.stickyOffset)
             contentScrollView.setContentOffset(CGPoint(x: 0, y: currentContentInitializeContentOffsetY), animated: false)
+            return true
         }
+        return false
+    }
+    
+    @discardableResult
+    func unloadViewController(at index: Int) -> Bool {
+        // 不允许移除当前显示的控制器
+        guard viewController(at: index) != nil else {
+            return false
+        }
+        
+        // 移除视图控制器
+        if let childViewController = viewController(at: index) {
+            removeChildViewController(childViewController)
+            viewControllerMap.removeValue(forKey: index)
+            
+            headerManager?.removePageHeader(at: index)
+            
+            return true
+        }
+        
+        return false
     }
     
     func loadViewControllers(at indexes: [Int]) {
@@ -92,19 +121,33 @@ class NestedPageChildManager {
     }
     
     func loadViewControllers() {
-        guard let viewController = viewController else { return }
+        guard let viewController = viewController,
+              let dataSource = viewController.dataSource else { return }
         
-        // 初始化 currentIndex
-        currentIndex = viewController.preloadViewControllerIndexes.first ?? 0
+        currentIndex = viewController.defaultPageIndex
         
-        // 预加载视图控制器
-        if !viewController.preloadViewControllerIndexes.isEmpty {
-            loadViewControllers(at: viewController.preloadViewControllerIndexes)
+        let count = dataSource.numberOfViewControllers(in: viewController)
+        
+        // 预加载需要预加载的视图控制器
+        var pagesToPreload: [Int] = []
+        
+        // 首先添加当前页面索引，确保优先加载
+        pagesToPreload.append(currentIndex)
+        
+        for index in 0..<count {
+            if index != currentIndex && dataSource.pageViewController(viewController, shouldPreloadViewControllerAt: index) {
+                pagesToPreload.append(index)
+            }
+        }
+        
+        // 加载所有需要预加载的页面
+        if !pagesToPreload.isEmpty {
+            loadViewControllers(at: pagesToPreload)
         }
         
         // 确保首次进入页面时currentContentScrollView有值
         if let childViewController = self.viewController(at: currentIndex) {
-            currentContentScrollView = childViewController.contentScrollView()
+            currentContentScrollView = childViewController.nestedPageContentScrollView
         }
     }
     
@@ -124,11 +167,10 @@ class NestedPageChildManager {
             childViewController.view.setNeedsLayout()
             childViewController.view.layoutIfNeeded()
             
-            let contentScrollView = childViewController.contentScrollView()
+            let contentScrollView = childViewController.nestedPageContentScrollView
             // 更新contentInset
-            let inset = UIEdgeInsets(top: headerManager.pageHeaderHeight, left: 0, bottom: contentScrollView.contentInset.bottom, right: 0)
-            contentScrollView.contentInset = inset
-            contentScrollView.scrollIndicatorInsets = inset
+            contentScrollView.contentInset = UIEdgeInsets(top: headerManager.pageHeaderHeight, left: 0, bottom: max(contentScrollView.safeAreaInsets.bottom, contentScrollView.contentInset.bottom), right: 0)
+            contentScrollView.scrollIndicatorInsets = contentScrollView.contentInset
             
             // 重置contentOffset到初始位置（顶部）
             contentScrollView.setContentOffset(CGPoint(x: 0, y: -headerManager.pageHeaderHeight), animated: false)
@@ -137,7 +179,7 @@ class NestedPageChildManager {
     
     // MARK: - Reload
     
-    func reloadPages() {
+    func rebuildPages() {
         
         // 保存当前索引
         let currentIdx = currentIndex
@@ -147,8 +189,7 @@ class NestedPageChildManager {
         
         // 清理视图控制器
         for childViewController in viewControllerMap.values {
-            childViewController.removeFromParent()
-            childViewController.view.removeFromSuperview()
+            removeChildViewController(childViewController)
         }
         viewControllerMap.removeAll()
         
@@ -158,20 +199,23 @@ class NestedPageChildManager {
         // 恢复当前索引
         currentIndex = currentIdx
         if let childViewController = self.viewController(at: currentIdx) {
-            currentContentScrollView = childViewController.contentScrollView()
+            currentContentScrollView = childViewController.nestedPageContentScrollView
         }
     }
-    
+
     // MARK: - Cleanup
     
     func cleanupOldData() {
         currentContentScrollView = nil
         for childViewController in viewControllerMap.values {
-            // 使用Combine不需要显式移除观察者
-            // 当scrollView被释放时，相关的订阅会自动失效
-            childViewController.removeFromParent()
-            childViewController.view.removeFromSuperview()
+            removeChildViewController(childViewController)
         }
         viewControllerMap.removeAll()
+    }
+    
+    func removeChildViewController(_ child: UIViewController) {
+        child.willMove(toParent: nil)
+        child.view.removeFromSuperview()
+        child.removeFromParent()
     }
 }

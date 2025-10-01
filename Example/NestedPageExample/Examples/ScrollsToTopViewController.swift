@@ -27,6 +27,7 @@ class ScrollsToTopViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         
+        self.title = nil
         // 添加导航栏右侧按钮
         let scrollToTopButton = UIBarButtonItem(title: "滚到顶部", style: .plain, target: self, action: #selector(scrollToTopButtonTapped))
         navigationItem.rightBarButtonItem = scrollToTopButton
@@ -41,10 +42,6 @@ class ScrollsToTopViewController: UIViewController {
     
     // MARK: - Setup
 
-    @objc private func backButtonTapped() {
-        navigationController?.popViewController(animated: true)
-    }
-    
     private func setupNestedPageViewController() {
         nestedPageViewController.dataSource = self
         
@@ -96,7 +93,7 @@ extension ScrollsToTopViewController: NestedPageViewControllerDataSource {
         return childControllerTitles.count
     }
     
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard index >= 0 && index < childControllerTitles.count else { return nil }
         
         switch index {
@@ -118,7 +115,7 @@ extension ScrollsToTopViewController: NestedPageViewControllerDataSource {
     }
     
     func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 250.0
+        return 260.0
     }
     
     func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
@@ -126,7 +123,7 @@ extension ScrollsToTopViewController: NestedPageViewControllerDataSource {
     }
     
     func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 50.0
+        return 40.0
     }
     
     func titlesForTabStrip(in pageViewController: NestedPageViewController) -> [String]? {

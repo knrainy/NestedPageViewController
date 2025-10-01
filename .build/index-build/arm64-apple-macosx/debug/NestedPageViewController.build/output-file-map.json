@@ -1,0 +1,61 @@
+{
+  "": {
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/master.swiftdeps"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageChildManager.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageChildManager.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageChildManager.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageChildManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageChildManager.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageChildManager.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageContainerScrollView.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageContainerScrollView.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageContainerScrollView.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageContainerScrollView~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageContainerScrollView.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageContainerScrollView.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageHeaderManager.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderManager.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderManager.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderManager.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderManager.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageHeaderView.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderView.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderView.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderView~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderView.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageHeaderView.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageScrollCoordinator.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageScrollCoordinator.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageScrollCoordinator.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageScrollCoordinator~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageScrollCoordinator.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageScrollCoordinator.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageTabStripView.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageTabStripView.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageTabStripView.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageTabStripView~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageTabStripView.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageTabStripView.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/NestedPageViewController.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageViewController.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageViewController.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageViewController~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageViewController.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/NestedPageViewController.dia"
+  },
+  "/Users/shengping_le/NestedPageViewController/Sources/NestedPageViewController/UIScrollView+ScrollingHelper.swift": {
+    "dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/UIScrollView+ScrollingHelper.d",
+    "object": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/UIScrollView+ScrollingHelper.swift.o",
+    "swiftmodule": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/UIScrollView+ScrollingHelper~partial.swiftmodule",
+    "swift-dependencies": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/UIScrollView+ScrollingHelper.swiftdeps",
+    "diagnostics": "/Users/shengping_le/NestedPageViewController/.build/index-build/arm64-apple-macosx/debug/NestedPageViewController.build/UIScrollView+ScrollingHelper.dia"
+  }
+}

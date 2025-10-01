@@ -13,8 +13,7 @@ class StandardViewController: UIViewController {
     // MARK: - Properties
     
     private var nestedPageViewController = NestedPageViewController()
-    private var coverView: UIView = UIView()
-    private var coverBgImageView: UIImageView = UIImageView()
+    private var coverView: UIView = ProfileCoverView(frame: .zero)
     
     // MARK: - View Controllers
     
@@ -25,17 +24,9 @@ class StandardViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "默认"
         view.backgroundColor = .systemBackground
         
-        let _ = createCoverView()
         setupNestedPageViewController()
-    }
-    
-    // MARK: - Setup
-
-    @objc private func backButtonTapped() {
-        navigationController?.popViewController(animated: true)
     }
     
     private func setupNestedPageViewController() {
@@ -72,14 +63,6 @@ class StandardViewController: UIViewController {
             height: view.bounds.height - safeAreaTop
         )
     }
-        
-    private func createCoverView() -> UIView {
-        let customCoverView = ProfileCoverView(frame: .zero)
-                
-        coverView = customCoverView
-        coverBgImageView = customCoverView.bgImageView
-        return customCoverView
-    }
 }
 
 // MARK: - NestedPageViewControllerDataSource
@@ -90,7 +73,7 @@ extension StandardViewController: NestedPageViewControllerDataSource {
         return childControllerTitles.count
     }
     
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard index >= 0 && index < childControllerTitles.count else { return nil }
         
         switch index {
@@ -112,7 +95,7 @@ extension StandardViewController: NestedPageViewControllerDataSource {
     }
     
     func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 250.0
+        return 260.0
     }
     
     func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
@@ -120,7 +103,7 @@ extension StandardViewController: NestedPageViewControllerDataSource {
     }
     
     func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 50.0
+        return 40.0
     }
     
     func titlesForTabStrip(in pageViewController: NestedPageViewController) -> [String]? {

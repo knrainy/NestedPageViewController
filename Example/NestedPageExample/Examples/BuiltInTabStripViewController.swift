@@ -13,9 +13,25 @@ class BuiltInTabStripViewController: UIViewController {
     // MARK: - Properties
     
     private var nestedPageViewController = NestedPageViewController()
-    private var coverView: UIView = UIView()
-    private var coverBgImageView: UIImageView = UIImageView()
-    private var tabStripView: NestedPageTabStripView!
+    private var coverView: UIView = ProfileCoverView(frame: .zero)
+    private lazy var tabStripView: NestedPageTabStripView = {
+        // 创建标签栏配置
+        var tabStripConfig = NestedPageTabStripConfiguration()
+        tabStripConfig.titles = childControllerTitles
+        tabStripConfig.titleColor = .gray
+        tabStripConfig.titleSelectedColor = .systemBlue
+        tabStripConfig.titleFont = .systemFont(ofSize: 16, weight: .medium)
+        tabStripConfig.backgroundColor = .systemBackground
+        tabStripConfig.contentEdgeInsets = UIEdgeInsets(top: 0, left: 50, bottom: 0, right: 50)
+        tabStripConfig.indicatorColor = .systemYellow
+        tabStripConfig.indicatorSize = CGSize(width: 50, height: 30)
+        tabStripConfig.indicatorSizeCornerRadius = 15
+        tabStripConfig.indicatorVerticalMargin = 5
+                
+        // 创建标签栏
+        tabStripView = NestedPageTabStripView(configuration: tabStripConfig)
+        return tabStripView
+    }()
     
     // MARK: - View Controllers
     
@@ -26,46 +42,13 @@ class BuiltInTabStripViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "简单定制内置tab栏"
         view.backgroundColor = .systemBackground
         
-        let _ = createCoverView()
-        createTabStripView()
         setupNestedPageViewController()
-    }
-    
-    private func createTabStripView() {
-        // 创建标签栏配置
-        let tabStripConfig = NestedPageTabStripConfiguration.defaultConfiguration()
-        tabStripConfig.titles = childControllerTitles
-        tabStripConfig.titleColor = .gray
-        tabStripConfig.titleSelectedColor = .systemBlue
-        tabStripConfig.titleFont = .systemFont(ofSize: 16, weight: .medium)
-        tabStripConfig.backgroundColor = .systemBackground
-        tabStripConfig.contentEdgeInsets = UIEdgeInsets(top: 0, left: 50, bottom: 12, right: 50)
-        
-        // 创建自定义指示器
-        let indicatorSize = CGSize(width: 12, height: 3)
-        let renderer = UIGraphicsImageRenderer(size: indicatorSize)
-        let indicatorImage = renderer.image { context in
-            UIColor.systemBlue.setFill()
-            let path = UIBezierPath(roundedRect: CGRect(origin: .zero, size: indicatorSize),
-                                   cornerRadius: 1.5)
-            path.fill()
-        }
-        tabStripConfig.indicatorImage = indicatorImage
-        tabStripConfig.indicatorSize = indicatorSize
-                
-        // 创建标签栏
-        tabStripView = NestedPageTabStripView(configuration: tabStripConfig)
     }
     
     // MARK: - Setup
 
-    @objc private func backButtonTapped() {
-        navigationController?.popViewController(animated: true)
-    }
-    
     private func setupNestedPageViewController() {
         nestedPageViewController.dataSource = self
         
@@ -99,14 +82,6 @@ class BuiltInTabStripViewController: UIViewController {
             height: view.bounds.height - safeAreaTop
         )
     }
-        
-    private func createCoverView() -> UIView {
-        let customCoverView = ProfileCoverView(frame: .zero)
-                
-        coverView = customCoverView
-        coverBgImageView = customCoverView.bgImageView
-        return customCoverView
-    }
 }
 
 // MARK: - NestedPageViewControllerDataSource
@@ -119,7 +94,7 @@ extension BuiltInTabStripViewController: NestedPageViewControllerDataSource {
         return childControllerTitles.count
     }
     
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard index >= 0 && index < childControllerTitles.count else { return nil }
         
         switch index {
@@ -141,7 +116,7 @@ extension BuiltInTabStripViewController: NestedPageViewControllerDataSource {
     }
     
     func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 250.0
+        return 260.0
     }
     
     func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
@@ -151,7 +126,7 @@ extension BuiltInTabStripViewController: NestedPageViewControllerDataSource {
     }
     
     func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 50.0
+        return 40.0
     }
     
     func titlesForTabStrip(in pageViewController: NestedPageViewController) -> [String]? {

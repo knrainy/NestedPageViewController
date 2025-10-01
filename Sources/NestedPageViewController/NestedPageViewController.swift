@@ -2,25 +2,33 @@
 //  NestedPageViewController.swift
 //  NestedPageViewController
 //
-//  Created by 乐升平 on 2025/8/22.
-//  Copyright © 2025 SPStore. All rights reserved.
+//  Created by 乐升平 on 2023/8/22.
+//  Copyright © 2023 SPStore. All rights reserved.
 //
 
 import UIKit
 import Combine
 
 /// 嵌套页面滚动协议，所有需要嵌套在NestedPageViewController中的子控制器必须实现该协议
-/// 该协议用于获取子控制器中的滚动视图，以便实现联动效果
-@objc public protocol NestedPageScrollable: AnyObject {
-    
-    /// 获取子控制器中的内容滚动视图
-    /// - Returns: 返回用于滚动内容的UIScrollView对象，contentScrollView必须要有布局.
-    /// - Note: 该方法用于获取子控制器中的滚动视图，以便与容器视图进行联动
-    func contentScrollView() -> UIScrollView
+/// 该协议用于获取子控制器中的滚动视图
+@objc public protocol NestedPageScrollable where Self: UIViewController {
+
+    /// 获取子控制器中的内容滚动视图。
+    ///
+    /// - Returns:
+    ///   用于展示内容的 `UIScrollView`，布局由外部控制。
+    ///
+    /// - Note:
+    ///   - 内部会自动设置以下偏移相关属性：
+    ///     - `contentInset`
+    ///     - `contentOffset`
+    ///     - `contentSize`（当 `autoAdjustsContentSizeMinimumHeight = true` 时）
+    ///     - `contentInsetAdjustmentBehavior`
+    /// - 外部修改这些属性时，请注意避免与内部的自动设置产生冲突
+    var nestedPageContentScrollView: UIScrollView { get }
 }
 
 /// 嵌套页面视图控制器的数据源协议
-/// 该协议定义了获取嵌套页面结构所需的所有数据方法
 public protocol NestedPageViewControllerDataSource: AnyObject {
     
     /// 获取页面控制器中子控制器的数量
@@ -32,12 +40,18 @@ public protocol NestedPageViewControllerDataSource: AnyObject {
     /// - Parameter pageViewController: 嵌套页面视图容器控制器
     /// - Parameter index: 子控制器的索引
     /// - Returns: 返回实现了NestedPageScrollable协议的视图控制器
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)?
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable?
+    
+    /// 判断指定索引位置的子控制器是否需要预加载
+    /// - Parameter pageViewController: 嵌套页面视图容器控制器
+    /// - Parameter index: 子控制器的索引
+    /// - Returns: 如果返回true，则该子控制器会在初始化时被预加载；如果返回false，则该子控制器会在需要时才被加载
+    func pageViewController(_ pageViewController: NestedPageViewController, shouldPreloadViewControllerAt index: Int) -> Bool
     
     /// 获取顶部封面视图
     /// - Parameter pageViewController: 嵌套页面视图容器控制器
     /// - Returns: 返回顶部封面视图对象，如果不需要可返回nil
-    /// - Note: 在NestedPageViewController的生命周期之内，只调用一次，除非reloadData.
+    /// - Note: 在NestedPageViewController的生命周期之内，只调用一次，除非reloadData
     func coverView(in pageViewController: NestedPageViewController) -> UIView?
     
     /// 获取顶部封面视图的高度
@@ -48,7 +62,7 @@ public protocol NestedPageViewControllerDataSource: AnyObject {
     /// 获取标签栏视图（可以通过简单配置，直接使用内置的NestedPageTabStripView，如果需要更多定制化的样式，请自定义标签栏视图或者使用其它开源组件）
     /// - Parameter pageViewController: 嵌套页面视图容器控制器
     /// - Returns: 返回标签栏视图对象，如果不需要可返回nil
-    /// - Note: 在NestedPageViewController的生命周期之内，只调用一次，除非reloadData.
+    /// - Note: 在NestedPageViewController的生命周期之内，只调用一次，除非reloadData
     func tabStrip(in pageViewController: NestedPageViewController) -> UIView?
     
     /// 获取标签栏的高度
@@ -63,7 +77,6 @@ public protocol NestedPageViewControllerDataSource: AnyObject {
 }
 
 /// 嵌套页面视图控制器的代理协议
-/// 该协议定义了页面控制器的事件回调方法
 public protocol NestedPageViewControllerDelegate: AnyObject {
     
     /// 页面横向滚动到指定索引位置的回调方法
@@ -81,11 +94,9 @@ public protocol NestedPageViewControllerDelegate: AnyObject {
     func pageViewController(_ pageViewController: NestedPageViewController, contentScrollViewDidScroll scrollView: UIScrollView, headerOffset: CGFloat, isSticked: Bool)
 }
 
-/// 整体结构为：顶部封面视图 + 标签栏 + 子页面区域，支持整体联动滚动
+/// 整体结构为：cover + tab + pages，支持整体联动滚动
 open class NestedPageViewController: UIViewController {
-    
-    // MARK: - Public Properties
-    
+        
     /// 横向滚动的容器视图
     public private(set) var containerScrollView: UIScrollView = NestedPageContainerScrollView()
     
@@ -97,22 +108,22 @@ open class NestedPageViewController: UIViewController {
     /// 是否保持子列表的滚动位置
     /// 当设置为true时，非吸顶状态下切换子列表时会保持每个列表的滚动位置
     /// 当设置为false时，非吸顶状态下切换子列表时会将新的列表滚动到初始位置
-    public var keepsContentScrollPosition: Bool = false
+    open var keepsContentScrollPosition: Bool = false
     
     /// 控制scrollView滑动到顶部后继续下拉头部视图是否有弹性效果（也就是继续下拉scrollView，头部视图是否跟随下拉）
-    /// 如果想要实现局部下拉刷新，请将该属性设置为false，才能看到刷新动效。
-    public var headerBounces: Bool = true
+    /// 如果想要实现局部下拉刷新，请将该属性设置为false，才能看到刷新动效
+    open var headerBounces: Bool = true
     
     /// 头视图是否始终保持不动
-    public var headerAlwaysFixed: Bool = false
+    open var headerAlwaysFixed: Bool = false
     
     /// 头部总高度
-    public var headerHeight: CGFloat {
+    open var headerHeight: CGFloat {
         return headerManager.pageHeaderHeight
     }
     
     /// 头视图达到吸顶状态的偏移，最小值为0，最大值为coverHeight
-    public var stickyOffset: CGFloat = 0.0
+    open var stickyOffset: CGFloat = 0.0
     
     /// 是否已经吸顶了
     public var isSticked: Bool {
@@ -120,52 +131,54 @@ open class NestedPageViewController: UIViewController {
     }
 
     /// 垂直滚动条是否显示
-    public var showsVerticalScrollIndicator: Bool = false
+    open var showsVerticalScrollIndicator: Bool = false
     
     /// 整个页面是否有弹性效果
-    public var bounces: Bool = true
+    open var bounces: Bool = true
     
     /// 是否自动调整容器视图的顶部和底部内边距
     /// 使用场景：系统导航栏显示情况下，如果nestedPageViewController.view的frame是全屏的，此时滑到屏幕最顶端header才会吸顶
     /// 但我们可能希望到达安全区域边界时就开始吸顶，此时可以设置automaticallyAdjustsContainerInsets=true，等效于containerInsets = UIEdgeInsets(safeTop, 0, safeBottom, 0)
     /// 如果不希望设置bottom，可以自行设置containerInsets
-    public var automaticallyAdjustsContainerInsets: Bool = false
+    open var automaticallyAdjustsContainerInsets: Bool = false
     
-    /// 容器视图的内边距，如果同时设置了containerInsets和automaticallyAdjustsContainerInsets = true，会取二者的较大值，只有top和bottom有效。
+    /// 容器视图的内边距，如果同时设置了containerInsets和automaticallyAdjustsContainerInsets = true，会取二者的较大值，只有top和bottom有效
     /// automaticallyAdjustsContainerInsets=true会同时调整top和botttom，containerInsets可以自由控制
-    public var containerInsets: UIEdgeInsets = .zero
+    open var containerInsets: UIEdgeInsets = .zero
 
     /// 是否允许通过手指拖拽来切换页面
-    public var allowsSwipeToChangePage: Bool = true {
+    open var allowsSwipeToChangePage: Bool = true {
         didSet {
-            updateScrollEnabled()
+            containerScrollView.isScrollEnabled = allowsSwipeToChangePage
         }
     }
     
-    /// 预加载指定的控制器索引数组，数组中的第一个索引将被优先展示.
-    /// 可以通过该属性，设置默认加载的子列表，比如初始状态下就要加载第3个子列表，那么设置[3]即可，相当于间接的设置了currentIndex.
-    public var preloadViewControllerIndexes: [Int] = [0]
+    /// 是否自动调整nestedPageContentScrollView的最小contentSize.height
+    /// 当为true时，会确保内容视图的高度至少等于可见区域高度，防止内容过少时无法滚动到顶部
+    /// 当为false时，内容视图的高度由其内容或者外部手动设置的决定，不进行额外调整
+    open var autoAdjustsContentSizeMinimumHeight: Bool = true
     
-    /// 当头部悬停在中间位置时，向上滚动是否只有触摸头部才让头部移动（keepsContentScrollPosition == true时才见效）
+    /// 默认显示的页面索引，默认为0（即第一个页面）
+    open var defaultPageIndex: Int = 0
+    
+    /// 当头部悬空时，向上滚动是否只有触摸头部才让头部移动（keepsContentScrollPosition == true时才见效）
     /// 当为 true 时：
-    ///   - 头部悬空时，触摸头部区域向上滚动 → 头部跟随移动
-    ///   - 头部悬空时，触摸内容区域向上滚动 → 头部保持不动
+    ///   - 触摸头部区域向上滚动 → 头部跟随移动
+    ///   - 触摸内容区域向上滚动 → 头部保持不动
     /// 当为 false 时：
-    ///   - 头部悬空时，无论触摸哪里向上滚动 → 头部都跟随移动（默认行为）
-    /// 悬空定义：当keepsContentScrollPosition设置为true，在其中某一个tab下滑动contentScrollView直到完全吸顶，切换tab
-    /// 然后滑动contentScrollView直到未吸顶，再切回原来的tab，此时定义头部为悬空（半吸顶）。
-    public var headerMovesOnlyWhenTouchingHeaderDuringHover: Bool = false
+    ///   - 无论触摸哪里向上滚动 → 头部都跟随移动（默认行为）
+    /// 悬空定义：当keepsContentScrollPosition设置为true，在其中某一个tab下滑动contentScrollView直到完全吸顶，切换tab，
+    /// 然后滑动contentScrollView直到未吸顶，再切回原来的tab，此时定义头部为悬空（半吸顶）
+    open var headerMovesOnlyWhenTouchingHeaderDuringHover: Bool = false
     
     /// 过渡到完全吸顶时是否中断惯性滚动
     /// 当为 true 时：从未完全吸顶过渡到完全吸顶时，如果内容滚动视图正在减速滚动，会中断滚动并固定在吸顶位置
     /// 当为 false 时：从未完全吸顶过渡到完全吸顶时，允许内容滚动视图的惯性滚动继续进行
-    public var interruptsScrollingWhenTransitioningToFullStick: Bool = false
+    open var interruptsScrollingWhenTransitioningToFullStick: Bool = false
 
-    public weak var dataSource: NestedPageViewControllerDataSource?
-    public weak var delegate: NestedPageViewControllerDelegate?
-    
-    // MARK: - Internal Properties
-    
+    weak open var dataSource: NestedPageViewControllerDataSource?
+    weak open var delegate: NestedPageViewControllerDelegate?
+        
     internal var containerView: UIView = UIView()
     
     internal var currentContentScrollView: UIScrollView? {
@@ -177,9 +190,7 @@ open class NestedPageViewController: UIViewController {
     }
     
     internal var isRotating: Bool = false
-    
-    // MARK: - Private Properties
-    
+        
     private let headerManager: NestedPageHeaderManager
     private let childManager: NestedPageChildManager
     private let scrollCoordinator: NestedPageScrollCoordinator
@@ -233,7 +244,7 @@ open class NestedPageViewController: UIViewController {
         super.viewDidLayoutSubviews()
 
         if childManager.viewControllerMap.isEmpty {
-            reloadData()
+            rebuild()
         }
     }
     
@@ -256,6 +267,14 @@ open class NestedPageViewController: UIViewController {
         }
     }
     
+    open override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        for (_, childViewController) in childManager.viewControllerMap {
+            let contentScrollView = childViewController.nestedPageContentScrollView
+            contentScrollView.contentInset = UIEdgeInsets(top: headerManager.pageHeaderHeight, left: 0, bottom: max(contentScrollView.safeAreaInsets.bottom, contentScrollView.contentInset.bottom), right: 0)
+        }
+    }
+    
     // MARK: - Public Methods
     
     /// 横向滚动到指定索引的页面
@@ -273,7 +292,7 @@ open class NestedPageViewController: UIViewController {
     
     /// 将当前内容滚动视图滚动到顶部
     /// - Parameter animated: 是否使用动画效果，默认为true
-    public func scrollToTop(animated: Bool = true) {
+    open func scrollToTop(animated: Bool = true) {
         guard let scrollView = currentContentScrollView else { return }
         scrollView.scrollToTop(animated: animated)
     }
@@ -281,12 +300,28 @@ open class NestedPageViewController: UIViewController {
     /// 获取指定索引位置的子视图控制器
     /// - Parameter index: 子控制器的索引
     /// - Returns: 返回实现了NestedPageScrollable协议的视图控制器，如果不存在则返回nil
-    public func viewController(at index: Int) -> (UIViewController & NestedPageScrollable)? {
+    public func viewController(at index: Int) -> NestedPageScrollable? {
         return childManager.viewController(at: index)
+    }
+    
+    /// 加载指定索引位置的子视图控制器
+    /// - Parameter index: 子控制器的索引
+    /// - Returns: 是否成功加载（如果索引无效或已加载则返回false）
+    @discardableResult
+    open func loadViewController(at index: Int) -> Bool {
+        return childManager.loadViewController(at: index)
+    }
+    
+    /// 移除指定索引位置的子视图控制器
+    /// - Parameter index: 子控制器的索引
+    /// - Returns: 是否成功移除（如果索引无效或该控制器是当前显示的控制器则返回false）
+    @discardableResult
+    open func unloadViewController(at index: Int) -> Bool {
+        return childManager.unloadViewController(at: index)
     }
         
     /// 重新加载所有数据，该方法会重建所有数据，包括子视图、头部视图等全部组件
-    open func reloadData() {
+    open func rebuild() {
         // 清理旧数据
         cleanupOldData()
         
@@ -301,11 +336,13 @@ open class NestedPageViewController: UIViewController {
     }
     
     /// 重新加载所有子页面，该方法仅重新加载子页面
-    open func reloadPages() {
-        childManager.reloadPages()
+    open func rebuildPages() {
+        childManager.rebuildPages()
     }
     
-    /// 更新所有布局，例如头部视图高度发生变化调用。
+    /// 更新所有布局
+    /// - 例如头部视图高度发生变化时，可以调用此方法。
+    /// - 设备旋转时会自动调用。
     open func updateLayouts() {
         
         setupContainerFrame()
@@ -361,9 +398,12 @@ open class NestedPageViewController: UIViewController {
         containerScrollView.isScrollEnabled = allowsSwipeToChangePage
         containerScrollView.delegate = self
         containerView.addSubview(containerScrollView)
-                        
-        if let NestedPageContainerScrollView = containerScrollView as? NestedPageContainerScrollView {
-            NestedPageContainerScrollView.headerContentView = headerManager.headerContentView
+        if let containerScrollView = containerScrollView as? NestedPageContainerScrollView {
+            containerScrollView.headerContentView = headerManager.headerContentView
+        }
+        if let interactivePopGestureRecognizer = navigationController?.interactivePopGestureRecognizer {
+            // 导航栏测侧滑手势优先级更高
+            containerScrollView.panGestureRecognizer.require(toFail: interactivePopGestureRecognizer)
         }
     }
     
@@ -378,11 +418,6 @@ open class NestedPageViewController: UIViewController {
         headerManager.cleanupOldData()
         childManager.cleanupOldData()
     }
-    
-    private func updateScrollEnabled() {
-        containerScrollView.isScrollEnabled = allowsSwipeToChangePage
-    }
-
 }
 
 // MARK: - UIScrollViewDelegate
@@ -407,15 +442,31 @@ extension NestedPageViewController: UIScrollViewDelegate {
     open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
         scrollCoordinator.handleScrollViewDidEndScrollingAnimation(scrollView)
     }
-
 }
 
 public extension NestedPageViewControllerDataSource {
     
-    func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 50.0
+    func pageViewController(_ pageViewController: NestedPageViewController, shouldPreloadViewControllerAt index: Int) -> Bool {
+        // 默认只预加载第一个页面
+        return index == 0
     }
-
+    
+    func coverView(in pageViewController: NestedPageViewController) -> UIView? {
+        return nil
+    }
+    
+    func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
+        return 0.0
+    }
+    
+    func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
+        return nil
+    }
+    
+    func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
+        return 0.0
+    }
+    
     func titlesForTabStrip(in pageViewController: NestedPageViewController) -> [String]? {
         return nil
     }
@@ -426,4 +477,3 @@ public extension NestedPageViewControllerDelegate {
     func pageViewController(_ pageViewController: NestedPageViewController, didScrollToPageAt index: Int) {}
     func pageViewController(_ pageViewController: NestedPageViewController, contentScrollViewDidScroll scrollView: UIScrollView, headerOffset: CGFloat, isSticked: Bool) {}
 }
-

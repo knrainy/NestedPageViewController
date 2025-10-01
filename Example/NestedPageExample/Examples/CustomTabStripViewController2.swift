@@ -27,7 +27,6 @@ class CustomTabStripViewController2: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "自定义标签栏"
         view.backgroundColor = .systemBackground
         
         categoryView.titles = childControllerTitles
@@ -57,10 +56,6 @@ class CustomTabStripViewController2: UIViewController {
     
     // MARK: - Setup
 
-    @objc private func backButtonTapped() {
-        navigationController?.popViewController(animated: true)
-    }
-    
     private func setupNestedPageViewController() {
         nestedPageViewController.dataSource = self
         nestedPageViewController.delegate = self
@@ -115,11 +110,11 @@ extension CustomTabStripViewController2: NestedPageViewControllerDataSource {
         return childControllerTitles.count
     }
     
-    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> (UIViewController & NestedPageScrollable)? {
+    func pageViewController(_ pageViewController: NestedPageViewController, viewControllerAt index: Int) -> NestedPageScrollable? {
         guard index >= 0 && index < childControllerTitles.count else { return nil }
         
         let title = childControllerTitles[index]
-        let controller = DefaulListVIewController()
+        let controller = DefaultListViewController()
         controller.title = title
         return controller
     }
@@ -129,7 +124,7 @@ extension CustomTabStripViewController2: NestedPageViewControllerDataSource {
     }
     
     func heightForCoverView(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 250.0
+        return 260.0
     }
     
     func tabStrip(in pageViewController: NestedPageViewController) -> UIView? {
@@ -137,7 +132,7 @@ extension CustomTabStripViewController2: NestedPageViewControllerDataSource {
     }
     
     func heightForTabStrip(in pageViewController: NestedPageViewController) -> CGFloat {
-        return 50.0
+        return 40.0
     }
 }
 

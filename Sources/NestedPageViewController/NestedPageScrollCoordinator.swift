@@ -2,8 +2,8 @@
 //  NestedPageScrollCoordinator.swift
 //  NestedPageViewController
 //
-//  Created by 乐升平 on 2025/8/22.
-//  Copyright © 2025 SPStore. All rights reserved.
+//  Created by 乐升平 on 2023/8/22.
+//  Copyright © 2023 SPStore. All rights reserved.
 //
 
 import UIKit
@@ -182,9 +182,8 @@ class NestedPageScrollCoordinator {
         if viewController.headerBounces {
             headerManager.moveHeaderContentViewToPageHeader(pageHeader, updatingY: 0)
         } else {
-            // bug修复： 局部下拉刷新时，由于外部可能会使用UIView动画设置scrollView的setContentOffset，这会导致在此处设置headerContentView的frame会闪跳。
-            // 解决思路：如果currentOffsetY < -headerManager.pageHeaderHeight，说明正在下拉刷新还未结束，此时固定headerContentView在fixedContainer上，这样就不会受到UIView动画的干扰。
-            // 这里不能使用scrollView.isTopBouncing，因为在刷新过程中，可能会设置offset.top = -inset.top，那么scrollView.isTopBouncing就会是false.
+            // bug修复： 局部下拉刷新时，由于外部可能会使用UIView动画设置scrollView的setContentOffset，这会导致在此处设置headerContentView的frame会闪跳
+            // 解决思路：如果currentOffsetY < -headerManager.pageHeaderHeight，说明正在下拉刷新还未结束，此时固定headerContentView在fixedContainer上，这样就不会受到UIView动画的干扰
             if currentOffsetY < -headerManager.pageHeaderHeight {
                 UIView.performWithoutAnimation {
                     headerManager.movePageHeaderToFixedContainerByPin()
@@ -203,7 +202,7 @@ class NestedPageScrollCoordinator {
                         self.isWaitingForAnimationEnd = false
                     }
                 } else {
-                    /** 虽然UIView.inheritedAnimationDuration是为0的，但并不代表不会有UIView动画，因为本方法是KVO监听的，是在UIView动画的下一个runloop中触发，可能来到这里的时候，动画已经结束了，但是新的UIView动画可能又立即开始了，此时会触发UIView.inheritedAnimationDuration > 0 这个分支，因此这里加一个isWaitingForAnimationEnd标记，永远保证新的UIView动画结束后，才恢复headerContentView的父视图为pageHeader */
+                    /** 虽然来到这里UIView.inheritedAnimationDuration是为0的，但并不代表不会有UIView动画，因为本方法是KVO监听的，是在UIView动画的下一个runloop中触发，可能来到这里的时候，动画已经结束了，但是新的UIView动画可能又立即开始了，此时会触发UIView.inheritedAnimationDuration > 0 这个分支，因此这里加一个isWaitingForAnimationEnd标记，永远保证新的UIView动画结束后，才恢复headerContentView的父视图为pageHeader */
                     if isWaitingForAnimationEnd == false {
                         // pin本身就是没有弹性的，直接根据pin确定headerContentView的位置
                         headerManager.movePageHeaderToPageHeaderByPin(currentIndex: childManager?.currentIndex ?? 0)
@@ -214,9 +213,9 @@ class NestedPageScrollCoordinator {
     }
 
     /**
-     同步其他子列表的滚动位置，这里通过 pin 的改变量控制其他scrollView 的滚动。
+     同步其他子列表的滚动位置，这里通过 pin 的改变量控制其他scrollView 的滚动
      
-     之所以不通过当前 scrollView 的改变量或者 headerContentView 的改变量来计算，是因为它们可能会跨越临界值，导致计算不准确。
+     之所以不通过当前 scrollView 的改变量或者 headerContentView 的改变量来计算，是因为它们可能会跨越临界值，导致计算不准确
      
      有两种情况，其余 scrollView 的改变量必须为 0（即不发生偏移）：
      
@@ -224,14 +223,11 @@ class NestedPageScrollCoordinator {
         - 在这种情况下，通过 headerContentView 的改变量也可以计算，但为了统一逻辑，仍然通过 pin 来控制。
      
      2. 当 scrollView 处于回弹状态时
-        - 回弹有两种情况：
-            1) scrollView 已经滚动到最顶部，继续下拉然后松手；
-            2) scrollView 已经滚动到最底部，继续上拉然后松手。
-        - 如果在回弹过程中直接设置其他 scrollView 的偏移，由于用户可能切换 tab，currentContentScrollView 可能已经变更，导致无法同步设置其余 scrollView 的偏移量，从而出现"悬挂"状态。
+        - 如果在回弹过程中直接设置其他 scrollView 的偏移，由于用户可能切换 tab，currentContentScrollView 可能已经变更，导致无法同步设置其余 scrollView 的偏移量，从而出现"悬挂"状态
      
      为了处理以上两种情况，引入 pin 视图：
-        - 无论是吸顶还是回弹状态，当达到临界值时，pin 都保持固定不动。
-        - 由于 pin 的改变量为 0，因此可以保证其余 scrollView 的改变量也为 0，从而统一控制滚动行为。
+        - 无论是吸顶还是回弹状态，当达到临界值时，pin 都保持固定不动
+        - 由于 pin 的改变量为 0，因此可以保证其余 scrollView 的改变量也为 0，从而统一控制滚动行为
      */
     private func syncScrollOtherContentScrollView() {
         guard let viewController = viewController,
@@ -243,7 +239,7 @@ class NestedPageScrollCoordinator {
         headerManager.previousPinY = currentPinY
                         
         for childViewController in childManager.viewControllerMap.values {
-            let contentScrollView = childViewController.contentScrollView()
+            let contentScrollView = childViewController.nestedPageContentScrollView
             guard contentScrollView != viewController.currentContentScrollView else {
                 continue
             }
@@ -251,8 +247,8 @@ class NestedPageScrollCoordinator {
             var newOffset = contentScrollView.contentOffset
             newOffset.y -= deltaY
                       
-            // 非吸顶状态时，如果keepsContentScrollPosition为false，其余scrollView偏移量全部恢复到初始值.
-            // abs(deltaY) > CGFloat.ulpOfOne（deltaY != 0）说明pin的y值发生了变化，发生变化就说明一定是非吸顶状态.
+            // 非吸顶状态时，如果keepsContentScrollPosition为false，其余scrollView偏移量全部恢复到初始值
+            // abs(deltaY) > CGFloat.ulpOfOne（deltaY != 0）说明pin的y值发生了变化，发生变化就说明一定是非吸顶状态
             if !viewController.keepsContentScrollPosition && abs(deltaY) > CGFloat.ulpOfOne {
                 newOffset.y = -(currentPinY + headerManager.pageHeaderHeight)
             }
@@ -304,17 +300,20 @@ class NestedPageScrollCoordinator {
             lastContentScrollView = viewController.currentContentScrollView
         }
         
-        // 第二个条件是判断是否回弹，回弹过程不用终止，因为回弹过程headerContentView的父视图是pageHeader，不存在y值不更新的问题。
+        /**
+          回弹过程不用终止，因为回弹过程headerContentView的父视图是pageHeader，不存在y值不更新的问题。
+          比较contentSize是避免crash: 如果外部无意导致contentSize的宽度大于容器宽，那么lastContentScrollView就可以水平滚动，同时也会触发containerScrollView水平滚动，此时调用stopScrolling会导致死循环.
+         */
         if let lastContentScrollView = lastContentScrollView,
-           lastContentScrollView.isDecelerating && !lastContentScrollView.isVerticalBouncing {
-            /** 立即终止lastContentScrollView滚动，如果在上一个scrolView减速过程中切换，由于减速过程在contentScrollViewDidScroll:中headerContentView的父视图已经切到了self，此时横向切换后currentContentScrollView已变，不会再更新headerContentView的y值，导致headerContentView的y值与上一个lastContentScrollView的偏移"脱钩"了，最终的现象就是滑回上一个scrollView后，headerContentView与scrollView的top之间有比较多的间隙。
+           lastContentScrollView.isDecelerating && !lastContentScrollView.isVerticalBouncing && lastContentScrollView.contentSize.width <= viewController.view.bounds.width {
+            /** 立即终止lastContentScrollView滚动，如果在上一个scrollView减速过程中切换，由于减速过程在contentScrollViewDidScroll:中headerContentView的父视图已经切到了self，此时横向切换后currentContentScrollView已变，不会再更新headerContentView的y值，导致headerContentView的y值与上一个lastContentScrollView的偏移"脱钩"了，最终的现象就是滑回上一个scrollView后，headerContentView与scrollView的top之间有比较多的间隙。
              */
             lastContentScrollView.stopScrolling()
         }
         
         var pageHeaderY: CGFloat = 0
         
-        // 满足这个条件，说明lastContentScrollView还在回弹，为了动画衔接的更加丝滑，让headerContentViewY持续跟随lastContentScrollView偏移量走，否则直接设置frame.minY，会有一个轻微的抖动现象。
+        // 满足这个条件，说明lastContentScrollView还在回弹，为了动画衔接的更加丝滑，让headerContentViewY持续跟随lastContentScrollView偏移量走，否则直接设置frame.minY，会有一个轻微的抖动现象
         // 解决场景：上一个scrollView在使劲往下拽回弹过程中，立即切换tab。
         if let lastContentScrollView = lastContentScrollView,
            lastContentScrollView.isTopBouncing && !viewController.headerAlwaysFixed {
@@ -328,7 +327,7 @@ class NestedPageScrollCoordinator {
         // 将headerContentView的坐标从pageHeader上切换到fixedContainer中来
         headerManager.moveHeaderContentViewToFixedContainer(updatingY: pageHeaderY)
         
-        /** 添加shimView是为了处理一种细节：当相邻的2个contentScrollView（或者说它们的根视图）的颜色不一致时，使劲下拉在回弹过程中切换tab，由于headerContentView此时还没恢复到顶，顶部有间隙，此时就可以看见相邻2个contentScrollView的不同颜色，为了遮盖这个现象，这里创建一个视图与contentScrollView顶部对齐，在contentScrollView之上 ，在headerContentView之下，跟正在回弹的那个contentScrollView保持一样的背景色。*/
+        /** 添加shimView是为了处理一种细节：当相邻的2个contentScrollView（或者说它们的根视图）的颜色不一致时，使劲下拉在回弹过程中切换tab，由于headerContentView此时还没恢复到顶，顶部有间隙，此时就可以看见相邻2个contentScrollView的不同颜色，为了遮盖这个现象，这里创建一个视图与contentScrollView顶部对齐，在contentScrollView之上，在headerContentView之下，跟正在回弹的那个contentScrollView保持一样的背景色。*/
         headerManager.insertShimViewIfNeed(lastContentScrollView: lastContentScrollView)
         
         handleScrollEndIfNeeded(scrollView)
@@ -370,7 +369,7 @@ class NestedPageScrollCoordinator {
                 }
             }
         } else { // 17.4以下系统
-            // 当setContentOffset(animated:)时执行，不论动画true还是false. 17.4及其以上系统，动画为true时，由scrollViewDidEndScrollingAnimation方法执行结束滚动逻辑，动画为false时，由当前方法执行滚动结束逻辑.
+            // 当setContentOffset(animated:)时执行，不论动画true还是false. 17.4及其以上系统，动画为true时，由scrollViewDidEndScrollingAnimation方法执行结束滚动逻辑，动画为false时，由当前方法执行滚动结束逻辑
             if !scrollView.isDragging && !scrollView.isDecelerating {
                 checkAndHandleScrollEnd(scrollView)
             }
@@ -378,7 +377,7 @@ class NestedPageScrollCoordinator {
     }
     
     // 之所以每次滚动结束也要做一次检查，是因为在滚动结束的那一瞬间，可能又触发了新的滚动（滚动结束不代表分页结束），这会导致头部视图闪跳。
-    // 一般2只手指同时操作容易出现，比如一只手点了第3个tab，同时另一只手立刻点第2个tab；或者手指横向滑动还未等分页结束另一只手就点击tab。
+    // 一般2只手指同时操作容易出现，比如一只手点了第3个tab，同时另一只手立刻点第2个tab；或者手指横向滑动还未等分页结束，另一只手就点击tab。
     private func checkAndHandleScrollEnd(_ scrollView: UIScrollView) {
         let offsetX = scrollView.contentOffset.x
         let index = Int(offsetX / scrollView.bounds.width + 0.5)
@@ -402,7 +401,7 @@ class NestedPageScrollCoordinator {
             childManager.loadViewController(at: index)
             
             if let childViewController = childManager.viewController(at: index) {
-                childManager.currentContentScrollView = childViewController.contentScrollView()
+                childManager.currentContentScrollView = childViewController.nestedPageContentScrollView
             }
             
             // 超出内容scrollView的距离，所以需要减去scrollView的y值(contentScrollView顶部可能有安全区域)
@@ -453,7 +452,9 @@ class NestedPageScrollCoordinator {
         // 观察contentOffset变化
         scrollView.publisher(for: \.contentOffset)
             .sink { [weak self, weak scrollView] _ in
-                guard let self = self, let scrollView = scrollView else { return }
+                guard let self = self,
+                        let scrollView = scrollView,
+                      let headerManager = self.headerManager, scrollView.contentInset.top == headerManager.pageHeaderHeight else { return }
                 self.contentScrollViewDidScroll(scrollView)
             }
             .store(in: &cancellables)
@@ -463,12 +464,17 @@ class NestedPageScrollCoordinator {
             .sink { [weak self, weak scrollView] newSize in
                 guard let self = self, let scrollView = scrollView,
                       let viewController = self.viewController,
-                      let headerManager = self.headerManager else { return }
+                      let headerManager = self.headerManager,
+                      viewController.autoAdjustsContentSizeMinimumHeight else { return }
+                         
+                guard !scrollView.isDragging && !scrollView.isDecelerating else { return }
+
                 let contentScrollViewY = viewController.contentScrollViewY
-                let minContentSizeHeight = viewController.containerView.bounds.height - headerManager.tabHeight - contentScrollViewY - viewController.stickyOffset
+                let minContentSizeHeight = viewController.containerView.bounds.height - headerManager.tabHeight - contentScrollViewY - scrollView.contentInset.bottom - viewController.stickyOffset
                 if minContentSizeHeight > newSize.height {
-                    scrollView.contentSize = CGSize(width: newSize.width, height: minContentSizeHeight)
+                    scrollView.contentSize.height = minContentSizeHeight
                 }
+                    
             }
             .store(in: &cancellables)
     }

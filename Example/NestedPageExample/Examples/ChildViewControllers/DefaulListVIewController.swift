@@ -1,5 +1,5 @@
 //
-//  DefaulListVIewController.swift
+//  DefaultListViewController.swift
 //  NestedPageExample
 //
 //  Created by 乐升平 on 2025/9/4.
@@ -8,7 +8,7 @@
 import UIKit
 import NestedPageViewController
 
-class DefaulListVIewController: ChildBaseViewController {
+class DefaultListViewController: ChildBaseViewController {
     
     private lazy var tableView: MyTableView = {
         let tableView = MyTableView()
@@ -36,7 +36,7 @@ class DefaulListVIewController: ChildBaseViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension DefaulListVIewController: UITableViewDataSource {
+extension DefaultListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 100
     }
@@ -49,15 +49,16 @@ extension DefaulListVIewController: UITableViewDataSource {
 }
 
 // MARK: - UITableViewDelegate
-extension DefaulListVIewController: UITableViewDelegate {
+extension DefaultListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
 // MARK: - NestedPageScrollable
-extension DefaulListVIewController: NestedPageScrollable {
-    func contentScrollView() -> UIScrollView {
+extension DefaultListViewController: NestedPageScrollable {
+    
+    var nestedPageContentScrollView: UIScrollView {
         return tableView
     }
 }

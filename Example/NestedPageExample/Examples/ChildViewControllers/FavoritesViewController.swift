@@ -8,26 +8,41 @@
 import UIKit
 import NestedPageViewController
 import MJRefresh
+import JXCategoryView
 
 class FavoritesViewController: ChildBaseViewController {
+
+    var headerHeight: CGFloat = 0 {
+        didSet {
+            self.flowLayout.headerHeight = headerHeight
+        }
+    }
+    
+    var headerOffset: CGFloat = 0.0 {
+        didSet {
+            self.flowLayout.headerOffset = headerOffset
+        }
+    }
+    
+    // 是否需要展示并吸顶sectionHeader
+    var isShowAndPinHeader: Bool = false {
+        didSet {
+            self.flowLayout.customSectionHeadersPinToVisibleBounds = isShowAndPinHeader
+        }
+    }
+    
+    private lazy var flowLayout: PinnedHeaderFlowLayout = {
+        let layout = PinnedHeaderFlowLayout()
+        return layout;
+    }()
     
     private lazy var collectionView: MyCollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        // 确保间距精确为10
-        layout.minimumInteritemSpacing = 10
-        layout.minimumLineSpacing = 10
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        // 动态计算cell大小，确保间距准确
-        let screenWidth = UIScreen.main.bounds.width
-        let totalHorizontalPadding: CGFloat = 10 + 10 + 10 // left + right + middle spacing
-        let cellWidth = (screenWidth - totalHorizontalPadding) / 2
-        layout.itemSize = CGSize(width: cellWidth, height: cellWidth)
-        
-        let collectionView = MyCollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = MyCollectionView(frame: .zero, collectionViewLayout: self.flowLayout)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.backgroundColor = .systemBackground
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "NumberCell")
+        collectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "SectionHeader")
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
@@ -91,8 +106,21 @@ class FavoritesViewController: ChildBaseViewController {
 
 // MARK: - UICollectionViewDataSource
 extension FavoritesViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 100
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionHeader {
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "SectionHeader", for: indexPath) as! SectionHeaderView
+            // 不需要额外配置，因为SectionHeaderView在初始化时已经设置好了JXCategoryTitleImageView
+            return headerView
+        }
+        return UICollectionReusableView()
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -133,9 +161,101 @@ extension FavoritesViewController: UICollectionViewDelegate {
     }
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
+
+// 布局配置通过代理方法实现，不要用layout在初始化时设置，因为要演示旋转，旋转后屏幕宽高发生了变化，itemSize需要通过代理的方式更新.
+extension FavoritesViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 10
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let screenWidth = UIScreen.main.bounds.width
+        let totalHorizontalPadding: CGFloat = 10 + 10 + 10 // left + right + middle spacing
+        let cellWidth = (screenWidth - totalHorizontalPadding) / 2
+        return CGSize(width: cellWidth, height: cellWidth)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        // 根据isShowAndPinHeader属性决定是否显示header
+        if isShowAndPinHeader {
+            return CGSize(width: collectionView.bounds.width, height: 30)
+        } else {
+            // 返回零尺寸表示不显示header
+            return CGSize.zero
+        }
+    }
+}
+
+// MARK: - Section Header View
+class SectionHeaderView: UICollectionReusableView, JXCategoryViewDelegate {
+    
+    private let categoryView: JXCategoryTitleView = {
+        let view = JXCategoryTitleView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 配置基本属性
+        view.titleFont = .systemFont(ofSize: 14)
+        view.titleColor = .darkGray
+        view.titleSelectedColor = .systemBlue
+        view.isAverageCellSpacingEnabled = false
+        return view
+    }()
+    
+    // 用于展示内容的容器视图
+    private let contentView = UIView()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupUI() {
+        backgroundColor = .systemBackground
+        
+        // 添加分类视图
+        addSubview(categoryView)
+        NSLayoutConstraint.activate([
+            categoryView.topAnchor.constraint(equalTo: topAnchor),
+            categoryView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            categoryView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            categoryView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+        
+        // 配置数据
+        setupCategoryData()
+    }
+    
+    private func setupCategoryData() {
+        let titles = ["我的收藏夹", "音乐", "视频", "合集", "话题", "影视综", "小说", "记录片"]
+        categoryView.titles = titles
+        categoryView.delegate = self
+        categoryView.reloadData()
+    }
+    
+    // MARK: - JXCategoryViewDelegate
+    func categoryView(_ categoryView: JXCategoryBaseView!, didSelectedItemAt index: Int) {
+        // 处理选择事件
+        print("选中了分类: \(index)")
+    }
+}
+
 // MARK: - NestedPageScrollable
 extension FavoritesViewController: NestedPageScrollable {
-    func contentScrollView() -> UIScrollView {
+
+    var nestedPageContentScrollView: UIScrollView {
         return collectionView
     }
 }

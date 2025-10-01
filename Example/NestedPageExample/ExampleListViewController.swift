@@ -33,6 +33,8 @@ class ExampleListViewController: UIViewController {
         title = "示例列表"
         view.backgroundColor = .systemBackground
         
+        navigationItem.backButtonTitle = ""   // 只保留返回箭头
+        
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -89,7 +91,7 @@ extension ExampleListViewController: UITableViewDelegate {
         
         let model = dataSource[indexPath.section].examples[indexPath.row]
         let viewController = model.targetClass.init()
-        
+        viewController.title = model.title
         switch model.action {
         case .push:
             // 如果不是IncludeTabBarViewController类型，才隐藏TabBar

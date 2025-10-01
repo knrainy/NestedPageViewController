@@ -25,7 +25,7 @@ class PostsViewController: ChildBaseViewController {
         setupTableView()
         setupRefresh()
     }
-    
+
     private func setupTableView() {
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -100,7 +100,7 @@ extension PostsViewController: UITableViewDelegate {
 
 // MARK: - NestedPageScrollable
 extension PostsViewController: NestedPageScrollable {
-    func contentScrollView() -> UIScrollView {
+    var nestedPageContentScrollView: UIScrollView {
         return tableView
     }
 }

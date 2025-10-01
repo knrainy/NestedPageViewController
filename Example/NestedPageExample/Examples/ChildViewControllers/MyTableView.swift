@@ -12,4 +12,5 @@ class MyTableView: UITableView {
     override func setContentOffset(_ contentOffset: CGPoint, animated: Bool) {
         super.setContentOffset(contentOffset, animated: animated)
     }
+    
 }
