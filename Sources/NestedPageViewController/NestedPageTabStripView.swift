@@ -291,7 +291,7 @@ open class NestedPageTabStripView: UIView {
         updateIndicatorPosition(animated: animated)
         
         // 让关联的linkedScrollView滚动到对应页面
-        scrollLinkedScrollView(to: index, animated: true)
+        scrollLinkedScrollView(to: index, animated: false)
         
         // 通知代理
         delegate?.tabStripView(self, didSelectTabAt: index)
